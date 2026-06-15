@@ -1,0 +1,14 @@
+Many early dot‑com investors focused almost entirely on **revenue growth** instead of **net income**.
+초기 닷컴 투자자 중 다수는 순이익이 아니라 매출 증가에 거의 전적으로 초점을 맞췄다.
+Many early dot‑com companies earned most of their revenue from selling **advertising space** on their Web sites.
+초기 닷컴 기업 중 다수는 웹 사이트의 광고 공간을 판매하여 매출의 대부분을 올렸다.
+To boost **reported revenue**, some sites began exchanging ad space.
+보고되는 매출을 늘리기 위해 일부 사이트는 광고 공간을 교환하기 시작했다.
+Company A would **put an ad** for its Web site on company B’s Web site, and company B would put an ad for its Web site on company A’s Web site.
+A사는 자사 웹 사이트 광고를 B사의 웹 사이트에 싣고, B사는 자사 웹 사이트 광고를 A사의 웹 사이트에 실었다.
+No money ever **changed hands**, but each company recorded revenue (for the value of the space that it gave up on its site) and expense (for the value of its ad that it placed on the other company’s site).
+실제로 돈이 오가지는 않았지만 각 기업은 자사 사이트에서 내준 공간의 가치만큼 매출을, 상대 기업 사이트에 실은 자사 광고의 가치만큼 비용을 기록했다.
+This practice did little to boost net income and resulted in no additional **cash inflow** ─ but it did boost reported revenue.
+이 관행은 순이익을 거의 늘리지 못했고 추가 현금 유입도 만들어 내지 않았지만, 보고되는 매출은 실제로 늘렸다.
+This practice was quickly **put to an end** because accountants felt that it did not meet the criteria of the **revenue recognition principle**.
+회계사들이 이 관행이 수익 인식 원칙의 기준을 충족하지 못한다고 판단했기 때문에 이는 빠르게 중단되었다.

@@ -1,0 +1,16 @@
+In art, there are a number of ways to use **perspective** to obtain the **illusion of depth**, including using colors and graduated values of black and white, and accurately drawing the subject by applying the rules of the geometric system of perspective.
+미술에서는 색과 단계적으로 변하는 흑백의 명암을 사용하고 기하학적 원근법 체계의 규칙을 적용해 대상을 정확히 그리는 것을 포함하여, 원근법으로 깊이의 착시를 얻는 여러 방법이 있다.
+In order to achieve perspective, you must make a number of **observations**.
+원근감을 구현하려면 여러 가지를 관찰해야 한다.
+The forms or objects that you draw on a flat surface actually have depth and **dimension** in real life.
+여러분이 평면에 그리는 형태나 물체는 현실에서 실제로 깊이와 입체감을 지닌다.
+As you view them and place their shapes and forms on a drawing surface, try to **represent** that depth to make the objects appear **realistic** and three‐ dimensional.
+그것들을 관찰하고 그 모양과 형태를 그림의 표면에 옮길 때, 물체가 사실적이고 입체적으로 보이도록 그 깊이를 표현하려고 노력하라.
+Objects appear differently when viewed from various **positions**.
+물체는 여러 위치에서 바라볼 때 서로 다르게 보인다.
+Because of this, it’s important to **establish** the **viewpoint**, and stick with it.
+이 때문에 관점을 정하고 그것을 일관되게 유지하는 것이 중요하다.
+When **observing a subject**, you see depth and three dimensions.
+대상을 관찰할 때 여러분은 깊이와 세 개의 차원을 본다.
+When you draw this subject onto a **flat surface** as it appears to the eye, you are drawing in perspective.
+이 대상을 눈에 보이는 대로 평면에 그릴 때, 여러분은 원근법으로 그리고 있는 것이다.

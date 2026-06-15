@@ -1,0 +1,22 @@
+**Correlations** are powerful because the **insights** they offer are relatively clear.
+상관관계는 그것이 제공하는 통찰이 비교적 명확하기 때문에 강력하다.
+These insights are often **covered up** when we bring **causality** back into the picture.
+우리가 인과관계를 다시 끌어들이면 이러한 통찰은 흔히 가려진다.
+For instance, a used-car dealer supplied data to statisticians to **predict** which of the vehicles available for purchase at an auction were likely to have problems.
+예를 들어, 한 중고차 판매업자는 경매에서 구매할 수 있는 차량 중 어떤 것에 문제가 있을 가능성이 큰지 예측하도록 통계학자들에게 자료를 제공했다.
+A correlation analysis showed that orange-colored cars were far less likely to have **defects**.
+상관관계 분석은 주황색 자동차에 결함이 있을 가능성이 훨씬 더 낮다는 것을 보여 주었다.
+Even as we read this, we already think about why it might be so: Are orange-colored car owners likely to be car **enthusiasts** and take better care of their vehicles?
+우리는 이것을 읽는 순간에도 이미 그 이유를 생각한다. 주황색 자동차의 소유자는 자동차 애호가일 가능성이 커서 차량을 더 잘 관리하는 것일까?
+Or, is it because orange-colored cars are more **noticeable** on the road and therefore less likely to be in accidents, so they’re in better condition when resold?
+아니면 주황색 자동차는 도로에서 더 눈에 띄어 사고를 당할 가능성이 더 낮고, 그래서 재판매될 때 상태가 더 좋은 것일까?
+Quickly we are caught in a web of competing **causal hypotheses**.
+우리는 금세 서로 경쟁하는 인과 가설의 그물에 사로잡힌다.
+But our attempts to **illuminate** things this way only make them cloudier.
+하지만 이런 방식으로 상황을 밝히려는 시도는 오히려 그것을 더 흐릿하게 만들 뿐이다.
+Correlations exist; we can show them **mathematically**.
+상관관계는 존재하며, 우리는 그것을 수학적으로 보여 줄 수 있다.
+We can’t easily do the same for **causal links**.
+인과적 연결에 대해서는 같은 일을 쉽게 할 수 없다.
+So we would do well to **hold off from** trying to explain the reason behind the correlations.
+그러므로 상관관계 이면의 이유를 설명하려는 시도를 보류하는 것이 좋다.

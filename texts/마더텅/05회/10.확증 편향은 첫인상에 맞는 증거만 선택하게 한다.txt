@@ -1,0 +1,20 @@
+We have **biases** that support our biases!
+우리는 우리의 편향을 뒷받침하는 편향을 가지고 있다!
+If we’re **partial to** one option ―perhaps because it’s more memorable, or framed to minimize loss, or seemingly consistent with a promising pattern ―we tend to search for information that will **justify** choosing that option.
+우리가 어떤 선택지를 더 좋아한다면, 아마 그것이 더 기억에 남거나 손실을 최소화하도록 표현되었거나 유망한 패턴과 일치하는 것처럼 보이기 때문에, 우리는 그 선택을 정당화할 정보를 찾는 경향이 있다.
+On the one hand, it’s sensible to make choices that we can **defend** with data and a list of reasons.
+한편으로는 자료와 이유 목록으로 방어할 수 있는 선택을 하는 것이 합리적이다.
+On the other hand, if we’re not careful, we’re likely to conduct an **imbalanced analysis**, falling prey to a cluster of errors collectively known as “**confirmation biases**.”
+다른 한편으로는 조심하지 않으면 불균형한 분석을 수행하여 ‘확증 편향’이라고 통칭되는 여러 오류의 희생양이 되기 쉽다.
+For example, nearly all companies include classic “tell me about yourself” job interviews as part of the hiring process, and many **rely on** these interviews alone to evaluate applicants.
+예를 들어 거의 모든 기업은 채용 과정에 전형적인 “자기소개를 해 보세요”라는 면접을 포함하며, 많은 기업이 지원자를 평가하는 데 이러한 면접에만 의존한다.
+But it turns out that traditional interviews are actually one of the least useful tools for **predicting** an employee’s future success.
+하지만 전통적인 면접은 실제로 직원의 미래 성공을 예측하는 데 가장 쓸모없는 도구 중 하나로 밝혀졌다.
+This is because interviewers often **subconsciously make up their minds** about interviewees based on their first few moments of interaction and spend the rest of the interview **cherry­picking evidence** and phrasing their questions to confirm that initial impression: “I see here you left a good position at your previous job.
+이는 면접관들이 흔히 처음 몇 순간의 상호 작용을 바탕으로 지원자에 대해 무의식적으로 마음을 정하고, 남은 면접 시간 동안 그 첫인상을 확인해 주는 증거만 골라내고 질문을 그런 식으로 표현하기 때문이다. “이전 직장에서 좋은 자리를 그만두셨군요.
+You must be pretty **ambitious**, right?” versus “You must not have been very **committed**, huh?”
+상당히 야심 찬 분이겠네요, 그렇죠?”라는 질문과 “별로 헌신적이지 않았나 보군요, 그렇죠?”라는 질문이 그 예이다.
+This means that interviewers can be **prone to overlooking** significant information that would clearly indicate whether this candidate was actually the best person to hire.
+이는 면접관들이 그 지원자가 실제로 채용하기에 가장 적합한 사람인지 분명히 보여 줄 중요한 정보를 간과하기 쉽다는 것을 의미한다.
+More **structured approaches**, like obtaining samples of a candidate’s work or asking how he would respond to difficult hypothetical situations, are dramatically better at **assessing** future success, with a nearly threefold advantage over traditional interviews.
+지원자의 작업 견본을 받거나 어려운 가상 상황에 어떻게 대응할지 묻는 것과 같은 더 구조화된 접근법은 미래의 성공을 평가하는 데 전통적인 면접보다 거의 세 배나 더 뛰어나다.

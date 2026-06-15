@@ -1,0 +1,12 @@
+To be **mathematically literate** means to be able to think critically about societal issues on which mathematics has bearing so as to make **informed decisions** about how to solve these problems.
+수학적 소양을 갖춘다는 것은 수학이 관련된 사회 문제를 비판적으로 사고하여 그 문제를 해결하는 방법에 대해 정보에 근거한 결정을 내릴 수 있다는 뜻이다.
+Dealing with such complex problems through **interdisciplinary approaches**, mirroring real-world problems requires innovative ways of planning and organizing mathematical teaching methods.
+현실 세계의 문제를 반영하여 학제 간 접근법으로 그러한 복잡한 문제를 다루려면 수학 교수법을 계획하고 조직하는 혁신적인 방식이 필요하다.
+Navigating our world means being able to **quantify**, measure, estimate, classify, compare, find patterns, conjecture, justify, prove, and generalize within critical thinking and when using critical thinking.
+우리의 세계를 헤쳐 나간다는 것은 비판적 사고 안에서 그리고 비판적 사고를 사용하면서 수량화하고, 측정하고, 추정하고, 분류하고, 비교하고, 패턴을 찾고, 추측하고, 정당화하고, 증명하고, 일반화할 수 있다는 뜻이다.
+Therefore, making decisions, even **qualitatively**, is not possible without using mathematics and critical thinking.
+따라서 정성적인 결정조차 수학과 비판적 사고를 사용하지 않고서는 내릴 수 없다.
+Thus, teaching mathematics should be done in interaction with critical thinking along with a **decision-making process**.
+그러므로 수학 교육은 의사 결정 과정과 더불어 비판적 사고와 상호 작용하는 방식으로 이루어져야 한다.
+They can be developed into the mathematical context, so that there is no excuse to not **explicitly support** students to develop them.
+비판적 사고와 의사 결정은 수학적 맥락 속에서 발달할 수 있으므로, 학생들이 그것들을 기르도록 명시적으로 지원하지 않을 이유가 없다.
