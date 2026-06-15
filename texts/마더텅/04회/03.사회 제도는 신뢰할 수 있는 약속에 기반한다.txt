@@ -1,0 +1,12 @@
+**Commitment** is the glue holding together characteristically human forms of social life.
+약속은 인간에게 특징적인 사회생활의 형태를 하나로 묶어 주는 접착제이다.
+Commitments make individuals’ behavior **predictable** in the face of **fluctuations** in their desires and interests, thereby **facilitating** the planning and **coordination** of joint actions involving multiple agents.
+약속은 욕구와 이해관계가 변동하는 상황에서도 개인의 행동을 예측 가능하게 하며, 그럼으로써 여러 행위자가 참여하는 공동 행동의 계획과 조정을 용이하게 한다.
+Moreover, commitments make people **willing to perform** actions that they would not otherwise perform.
+게다가 약속은 사람들이 그렇지 않으면 하지 않을 행동도 기꺼이 하게 만든다.
+For example, a taxi driver picks up his clients and transports them to their desired destination because they are **committed** to paying him afterwards for the service, and a construction worker performs her job every day because her employer has made a **credible commitment** to pay her at the end of the month.
+예를 들어, 택시 기사는 고객이 나중에 서비스 대금을 지급하기로 약속했기 때문에 고객을 태워 원하는 목적지까지 데려다주며, 건설 노동자는 고용주가 월말에 임금을 지급하겠다는 신뢰할 수 있는 약속을 했기 때문에 매일 자신의 일을 한다.
+Indeed, the taxi driver and the construction worker are willing to accept money as payment only because a **network** of other agents (notably the central bank) is committed to taking various measures to **sustain** the currency in question.
+실제로 택시 기사와 건설 노동자가 돈을 보수로 기꺼이 받는 것은 다른 행위자들의 네트워크, 특히 중앙은행이 해당 통화를 유지하기 위해 여러 조치를 취하기로 약속하고 있기 때문이다.
+Thus, social objects and **institutions** such as jobs, money, government, scientific collaborations and marriage depend for their **origin** and **stability** upon the credibility of commitments.
+따라서 직업, 화폐, 정부, 과학적 협력, 결혼과 같은 사회적 대상과 제도는 그 기원과 안정성을 약속의 신뢰성에 의존한다.

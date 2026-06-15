@@ -1,0 +1,18 @@
+A **computational algorithm** that takes input data and generates some output from it doesn’t really **embody** any notion of meaning.
+입력 데이터를 받아 어떤 출력을 생성하는 계산 알고리즘은 실제로 의미라는 개념을 전혀 구현하지 않는다.
+Certainly, such a computation does not generally have as its purpose its own **survival** and **well­being**.
+분명 그러한 계산은 일반적으로 자신의 생존과 안녕을 목적으로 하지 않는다.
+It does not, in general, **assign value** to the inputs.
+그것은 일반적으로 입력값에 가치를 부여하지 않는다.
+Compare, for example, a computer algorithm with the **waggle dance** of the honeybee, by which means a **foraging** bee conveys to others in the hive information about the source of food (such as nectar) it has located.
+예를 들어, 컴퓨터 알고리즘을 꿀벌의 꼬리춤과 비교해 보라. 먹이를 찾는 벌은 이 춤을 통해 자신이 발견한 꿀과 같은 먹이의 위치에 관한 정보를 벌집의 다른 벌들에게 전달한다.
+The “dance” ― a series of **stylized movements** on the comb ― shows the bees how far away the food is and in which direction.
+벌집의 벌집판 위에서 이루어지는 일련의 정형화된 움직임인 이 ‘춤’은 먹이가 얼마나 멀리 있고 어느 방향에 있는지를 벌들에게 보여 준다.
+But this input does not simply **program** other bees to go out and look for it.
+하지만 이 입력 정보가 다른 벌들이 밖으로 나가 먹이를 찾도록 단순히 프로그램하는 것은 아니다.
+Rather, they **evaluate** this information, comparing it with their own knowledge of the surroundings.
+오히려 벌들은 이 정보를 주변 환경에 관한 자신의 지식과 비교하며 평가한다.
+Some bees might not bother to make the journey, considering it not **worthwhile**.
+일부 벌은 그 여정이 가치가 없다고 여겨 굳이 떠나지 않을 수도 있다.
+The input, such as it is, is processed in the light of the organism’s own **internal states** and history; there is nothing **prescriptive** about its effects.
+그 입력은 생물 자신의 내적 상태와 이력에 비추어 처리되며, 그 효과에는 행동을 강제하는 것이 전혀 없다.
