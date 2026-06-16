@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/study.css') }}">
 </head>
 <body class="page-select" data-page="select">
-    <div id="page-root">
+    <div id="page-root" data-current-path="{{ browse["current_path"] }}">
         <div class="page-shell">
             <div class="title-wrapper">
                 <h2 class="site-title">Rion's English Study Page</h2>
@@ -60,15 +60,63 @@
                             <span class="slider"></span>
                         </label>
                     </div>
+                    <details class="upload-panel" id="uploadPanel">
+                        <summary class="upload-toggle" aria-controls="uploadContents" aria-expanded="false">업로드</summary>
+                        <div class="create-panel" id="uploadContents">
+                            <div class="upload-guide-row">
+                                <button type="button" class="guide-button" id="openFormatGuide">텍스트 양식 가이드</button>
+                            </div>
+                            <form class="create-form create-folder-form" id="createFolderForm">
+                                <input type="text" name="name" autocomplete="off" maxlength="120" placeholder="새 폴더 이름" required>
+                                <button type="submit" class="create-button">폴더 만들기</button>
+                            </form>
+                            <form class="create-form create-text-form" id="createTextForm">
+                                <div class="create-text-row">
+                                    <input type="text" name="title" autocomplete="off" maxlength="120" placeholder="새 텍스트 제목" required>
+                                    <button type="submit" class="create-button primary">텍스트 만들기</button>
+                                </div>
+                                <textarea name="content" rows="4" placeholder="영어와 한국어 문장을 붙여넣기" required></textarea>
+                            </form>
+                            <p class="create-status" id="createStatus" aria-live="polite"></p>
+                        </div>
+                    </details>
+                    <div class="format-guide-modal" id="formatGuideModal" aria-hidden="true">
+                        <div class="format-guide-dialog" role="dialog" aria-modal="true" aria-labelledby="formatGuideTitle">
+                            <div class="format-guide-header">
+                                <h3 id="formatGuideTitle">텍스트 양식 가이드</h3>
+                                <button type="button" class="format-guide-close" id="closeFormatGuide">닫기</button>
+                            </div>
+                            <div class="format-guide-body">
+                                <section>
+                                    <h4>1. 기본 작성법</h4>
+                                    <p>영어 문장 한 줄, 그 문장에 맞는 한국어 해석 한 줄을 번갈아 작성합니다. 단어 채우기에서 빈칸으로 낼 단어는 영어 줄 안에서 <code>**단어**</code>처럼 감싸면 됩니다.</p>
+                                    <pre><code>Can I use the temporary parking lot?
+임시 주차장을 이용할 수 있나요?
+I would like to **request** a temporary parking space.
+저는 임시 주차 공간을 요청하고 싶습니다.
+The repair work will end next Friday.
+보수 공사는 다음 주 금요일에 끝납니다.</code></pre>
+                                </section>
+                                <section>
+                                    <h4>2. 작성 규칙</h4>
+                                    <p>한 문장은 가능한 한 줄에 끝내세요. 영어 줄과 한국어 줄의 순서가 어긋나면 한줄 해석과 실시간 번역 하이라이트도 같이 어긋납니다.</p>
+                                    <p>한국어 해석 없이 영어만 넣을 수도 있지만, 이 경우 한줄 해석 탭과 한국어 창에는 해석이 표시되지 않습니다.</p>
+                                    <p>빈칸 표시는 여러 개 넣을 수 있습니다. 예를 들어 <code>She **reserved** a **seat**.</code>처럼 작성하면 단어 채우기에서 두 단어가 순서대로 문제로 나옵니다.</p>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
                     <div class="file-list">
                         <ul>
                             {% if browse["items"] %}
                                 {% for item in browse["items"] %}
                                 <li>
                                     {% if item["type"] == "folder" %}
-                                    <a class="item-link folder-item" href="{{ url_for('select_page', subdirectory=item["path"]) }}">
-                                        <span>📁</span> {{ item["name"] }}
-                                    </a>
+                                    <div class="folder-item-container">
+                                        <a class="item-link folder-item" href="{{ url_for('select_page', subdirectory=item["path"]) }}">
+                                            <span>📁</span> {{ item["name"] }}
+                                        </a>
+                                    </div>
                                     {% else %}
                                     <div class="file-item-container">
                                         <div class="file-title">{{ item["name"] }}</div>
@@ -82,7 +130,7 @@
                                 </li>
                                 {% endfor %}
                             {% else %}
-                            <li>
+                            <li class="empty-folder-item">
                                 <div class="file-item-container">
                                     <div class="file-title">현재 폴더에 텍스트가 없습니다.</div>
                                 </div>

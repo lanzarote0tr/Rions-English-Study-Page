@@ -42,7 +42,7 @@
                 </div>
                 <div class="study-content-row">
                     <div class="study-main-panel">
-                        <div id="text-display" class="text-display{% if mode == 'practice' %} practice-display{% endif %}{% if mode == 'line' %} line-translation-display{% endif %}" {% if mode in ('practice', 'line') %}tabindex="0"{% endif %}></div>
+                        <div id="text-display" class="text-display{% if mode == 'practice' %} practice-display{% endif %}{% if mode == 'line' %} line-translation-display{% endif %}" {% if mode == 'practice' %}tabindex="0"{% endif %}></div>
                         <div class="controls">
                             <div class="navigation-buttons">
                                 {% if text["previous_text_path"] %}

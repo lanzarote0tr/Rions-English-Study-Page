@@ -7,6 +7,7 @@
         fillFirstLetter: false,
     };
     const studyProgressStorageKey = "englishStudyProgress";
+    const localTextPrefix = "__local__/";
     const studyPageContextKeys = {
         previousPage: "englishStudyPreviousPage",
         previousStudyTextPath: "englishStudyPreviousStudyTextPath",
@@ -159,6 +160,69 @@
         return splitIntoSentences(koreanText).sentences;
     }
 
+    function containsHangul(text) {
+        return /[가-힣]/.test(text);
+    }
+
+    function parseLocalTextContent(rawText) {
+        const normalized = String(rawText || "").replace(/\ufeff/g, "").trim();
+        const lines = normalized.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+        if (lines.length >= 2 && lines.length % 2 === 0) {
+            const englishLines = lines.filter((_, index) => index % 2 === 0);
+            const koreanLines = lines.filter((_, index) => index % 2 === 1);
+            const alternating = englishLines.every((line) => !containsHangul(line))
+                && koreanLines.every((line) => containsHangul(line));
+            if (alternating) {
+                return {
+                    english_content: englishLines.join("\n"),
+                    korean_content: koreanLines.join("\n"),
+                    line_pairs: englishLines.map((english, index) => ({
+                        english,
+                        korean: koreanLines[index] || "",
+                    })),
+                };
+            }
+        }
+
+        return {
+            english_content: lines.join("\n"),
+            korean_content: "",
+            line_pairs: [],
+        };
+    }
+
+    function resolveLocalTextPayload(text) {
+        if (!text.text_path || !text.text_path.startsWith(localTextPrefix)) {
+            return text;
+        }
+
+        const localPath = text.text_path.slice(localTextPrefix.length);
+        const localText = window.EnglishStudyLocal && window.EnglishStudyLocal.getText
+            ? window.EnglishStudyLocal.getText(localPath)
+            : null;
+        if (!localText) {
+            return {
+                ...text,
+                title: "개인 텍스트 없음",
+                english_content: "이 브라우저에서 저장된 개인 텍스트를 찾을 수 없습니다.",
+                korean_content: "",
+                line_pairs: [],
+                parent_dir_path: localPath.split("/").slice(0, -1).join("/"),
+            };
+        }
+
+        const parsed = parseLocalTextContent(localText.content);
+        return {
+            ...text,
+            title: localText.name,
+            text_path: `${localTextPrefix}${localText.path}`,
+            english_content: parsed.english_content,
+            korean_content: parsed.korean_content,
+            line_pairs: parsed.line_pairs,
+            parent_dir_path: localText.parent_path || "",
+        };
+    }
+
     function findSentenceIndex(boundaries, cursorIndex) {
         const found = boundaries.findIndex((boundary) => cursorIndex < boundary.end);
         if (found >= 0) {
@@ -191,8 +255,9 @@
             }
 
             const studyData = JSON.parse(studyDataEl.textContent);
+            const resolvedText = resolveLocalTextPayload(studyData.text);
             const state = {
-                text: studyData.text,
+                text: resolvedText,
                 mode: normalizeStudyMode(studyData.mode),
                 settings: loadSettings(),
                 koreanVisible: false,
@@ -202,6 +267,12 @@
 
             let cleanup = () => {};
             let persistCurrentMode = () => {};
+
+            const studyTitle = document.querySelector(".study-title");
+            if (studyTitle) {
+                studyTitle.textContent = state.text.title;
+            }
+            document.title = `${state.text.title} - Rion's English Study Page`;
 
             if (previousContext.page !== "study" || previousContext.textPath !== state.text.text_path) {
                 delete state.progress[state.text.text_path];
@@ -1293,7 +1364,6 @@
                 updateCardStates();
                 syncScenePadding();
                 updateCamera(false);
-                textDisplay.focus();
                 darkModeToggle.addEventListener("change", handleDarkModeChange);
                 camera.addEventListener("touchstart", handleTouchStart, { passive: true });
                 camera.addEventListener("touchmove", handleTouchMove, { passive: false });

@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 from flask import Flask, abort, jsonify, redirect, render_template, request, url_for
+from werkzeug.exceptions import HTTPException
 import logging
 
 logging.basicConfig(
@@ -40,11 +41,20 @@ def _log_request(response):
     )
     return response
 
+
+@app.errorhandler(HTTPException)
+def _handle_http_exception(error: HTTPException):
+    if request.path.startswith("/api/"):
+        response = jsonify({"message": error.description})
+        response.status_code = error.code or 500
+        return response
+    return error
+
 APP_ROOT = Path(__file__).resolve().parent
 TEXTS_BASE_DIR = APP_ROOT / "texts"
 IMAGE_DIR = APP_ROOT / "static" / "img"
-KOREAN_SEPARATOR = "--korean--"
 HANGUL_RANGE = ("가", "힣")
+LOCAL_TEXT_PREFIX = "__local__/"
 
 
 def _resolve_under(base_dir: Path, relative_path: str = "") -> Path:
@@ -103,22 +113,6 @@ def _contains_hangul(text: str) -> bool:
     return any(HANGUL_RANGE[0] <= char <= HANGUL_RANGE[1] for char in text)
 
 
-def _parse_legacy_separator_format(raw_text: str) -> dict[str, str | list[dict[str, str]]]:
-    english_part, korean_part = raw_text.split(KOREAN_SEPARATOR, 1)
-    english_lines = [line.strip() for line in english_part.splitlines() if line.strip()]
-    korean_lines = [line.strip() for line in korean_part.splitlines() if line.strip()]
-    pair_count = min(len(english_lines), len(korean_lines))
-    line_pairs = [
-        {"english": english_lines[index], "korean": korean_lines[index]}
-        for index in range(pair_count)
-    ]
-    return {
-        "english_content": "\n".join(english_lines),
-        "korean_content": "\n".join(korean_lines),
-        "line_pairs": line_pairs,
-    }
-
-
 def _parse_alternating_line_format(raw_text: str) -> dict[str, str | list[dict[str, str]]] | None:
     lines = [line.strip() for line in raw_text.replace("﻿", "").splitlines() if line.strip()]
     if len(lines) < 2 or len(lines) % 2 != 0:
@@ -147,9 +141,6 @@ def _parse_alternating_line_format(raw_text: str) -> dict[str, str | list[dict[s
 
 def _parse_text_content(raw_text: str) -> dict[str, str | list[dict[str, str]]]:
     normalized = raw_text.replace("﻿", "").strip()
-    if KOREAN_SEPARATOR in normalized:
-        return _parse_legacy_separator_format(normalized)
-
     alternating = _parse_alternating_line_format(normalized)
     if alternating is not None:
         return alternating
@@ -218,25 +209,47 @@ def _get_random_image_url() -> str | None:
     return url_for("static", filename=f"img/{random.choice(image_files)}")
 
 
-def _build_browse_payload(subdirectory: str = "") -> dict[str, object]:
+def _build_browse_payload(subdirectory: str = "", allow_missing: bool = False) -> dict[str, object]:
     breadcrumbs, parent_path = _build_breadcrumbs(subdirectory)
+    items = []
+    directory = _resolve_under(TEXTS_BASE_DIR, subdirectory)
+    if directory.is_dir():
+        items = _list_directory(subdirectory)
+    elif not allow_missing:
+        abort(404, "Directory not found")
+
     return {
         "current_path": subdirectory,
         "parent_path": parent_path,
         "breadcrumbs": breadcrumbs,
-        "items": _list_directory(subdirectory),
+        "items": items,
         "random_image_url": _get_random_image_url(),
     }
 
 
 def _build_text_payload(text_path: str) -> dict[str, object]:
+    if text_path.startswith(LOCAL_TEXT_PREFIX):
+        local_path = text_path[len(LOCAL_TEXT_PREFIX):]
+        path = Path(local_path)
+        return {
+            "title": path.stem,
+            "text_path": text_path,
+            "english_content": "",
+            "korean_content": "",
+            "line_pairs": [],
+            "previous_text_path": None,
+            "next_text_path": None,
+            "parent_dir_path": path.parent.as_posix() if path.parent.as_posix() != "." else "",
+            "random_image_url": _get_random_image_url(),
+        }
+
     payload = _load_text_payload(text_path)
     payload["random_image_url"] = _get_random_image_url()
     return payload
 
 
 def _render_select_page(subdirectory: str = "") -> str:
-    return render_template("select.html", browse=_build_browse_payload(subdirectory))
+    return render_template("select.html", browse=_build_browse_payload(subdirectory, allow_missing=True))
 
 
 def _render_study_page(text_path: str, mode: str | None) -> str:
