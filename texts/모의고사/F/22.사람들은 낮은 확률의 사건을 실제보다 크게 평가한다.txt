@@ -1,0 +1,18 @@
+For each **objective probability** — from one **percent** to 100 percent — we want to know the **subjective probability weight**.
+1퍼센트에서 100퍼센트까지 각각의 객관적 확률에 대해 우리는 주관적 확률 가중치를 알고자 한다.
+When we make **decisions**, do we **treat** a **one­percent** chance just like one percent, or like something else?
+우리가 결정을 내릴 때 1퍼센트의 가능성을 정확히 1퍼센트처럼 다루는가, 아니면 다른 어떤 것으로 다루는가?
+**Events** that could **happen** but aren’t likely — **low­probability events** — can be defined as probabilities up to about 25 percent.
+일어날 수는 있지만 가능성이 높지 않은 사건, 즉 낮은 확률의 사건은 약 25퍼센트까지의 확률로 정의될 수 있다.
+**Low­probability** **events** tend to **factor more into** decisions than they should.
+낮은 확률의 사건은 마땅히 그래야 하는 것보다 의사 결정에 더 많이 반영되는 경향이 있다.
+That is, an **event** that has an **objective** one­percent chance of occurring could **subjectively seem like** it has a five­percent chance of occurring.
+즉, 객관적으로 발생 확률이 1퍼센트인 사건이 주관적으로는 발생 확률이 5퍼센트인 것처럼 보일 수 있다.
+We **overestimate** the **likelihood** of these **low­probability** events.
+우리는 이러한 낮은 확률 사건의 가능성을 과대평가한다.
+In **general**, the **smaller** the **probability**, the more we overestimate its likelihood.
+일반적으로 확률이 작을수록 우리는 그 가능성을 더 많이 과대평가한다.
+For **example**, people who play the **lottery** are often **optimistic** about winning.
+예를 들어 복권을 사는 사람들은 당첨에 대해 흔히 낙관적이다.
+However, the **odds** of a **single** **ticket** winning the largest, most popular U.S. lotteries are on the order of one in 175 million.
+하지만 미국에서 가장 크고 인기 있는 복권에서 한 장의 복권이 당첨될 확률은 1억 7,500만 분의 1 정도이다.

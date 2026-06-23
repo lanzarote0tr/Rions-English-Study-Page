@@ -1,0 +1,12 @@
+We can **sometimes** **assume** that the whole will be as good as each of its parts.
+우리는 때때로 전체가 그 각각의 부분만큼 좋을 것이라고 가정할 수 있다.
+**Suppose**, for example, you’re in charge of a startup, and you know that everyone you’ve brought on board is **productive** and **efficient**.
+예를 들어 여러분이 스타트업을 맡고 있고, 여러분이 합류시킨 모든 사람이 생산적이고 효율적이라는 것을 안다고 가정해 보라.
+It might seem **logical** to **assume** that, as a **result**, the startup will be productive and efficient, too — but this isn’t necessarily true.
+그 결과 그 스타트업도 생산적이고 효율적일 것이라고 가정하는 것이 논리적으로 보일 수도 있지만, 이것이 반드시 사실은 아니다.
+The **fallacy of composition** **fails** to allow for how the different “parts” interact with each other — if, for example, your efficient administrator and your highly skilled head of IT each assumes the other is in charge of **collating** prototype test results, then you have a problem.
+구성의 오류는 서로 다른 ‘부분들’이 어떻게 상호 작용하는지를 고려하지 못한다. 예를 들어 효율적인 관리자와 고도로 숙련된 IT 책임자가 각각 시제품 테스트 결과를 취합하는 일을 상대방이 맡고 있다고 생각한다면, 문제가 생긴다.
+Equally, a unit **composed** of good people can still be **working** on a **doomed project**, and a project composed of good ideas may lack a stable center.
+마찬가지로 좋은 사람들로 구성된 조직도 여전히 실패할 운명의 프로젝트를 하고 있을 수 있으며, 좋은 아이디어들로 구성된 프로젝트도 안정적인 중심을 결여할 수 있다.
+When **assembling** a team with a **common** goal, always check the **overall view** as well as the individuals involved.
+공통의 목표를 가진 팀을 구성할 때는 관련된 개인들뿐만 아니라 전체적인 관점도 항상 확인하라.

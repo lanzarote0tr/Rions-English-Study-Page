@@ -1,0 +1,16 @@
+The **brain** needs to create a model of a constant pulse ― a **schema** ― so that we know when the musicians are not **conforming to** it.
+뇌는 음악가들이 그것을 따르지 않을 때를 알 수 있도록 일정한 박자의 모형, 즉 도식을 만들어야 한다.
+This is **similar** to variations of a melody: We need to have a **mental representation** of what the melody is in order to know ― and appreciate ― when the musician is **taking liberties with** it.
+이것은 멜로디의 변주와 유사하다. 우리는 음악가가 그것을 자유롭게 변형할 때를 알고 감상하기 위해 그 멜로디가 무엇인지에 대한 정신적 표상을 가지고 있어야 한다.
+**Metrical extraction**, **knowing** what the **pulse** is and when we expect it to occur, is a crucial part of musical emotion.
+박자가 무엇이고 그것이 언제 나타날 것으로 기대하는지를 아는 박자 추출은 음악적 감정의 중요한 부분이다.
+**Music** **communicates** to us emotionally through **systematic violations** of expectations.
+음악은 기대를 체계적으로 위반함으로써 우리에게 정서적으로 소통한다.
+These **violations** can **occur** in any **domain** ― the domain of pitch, rhythm, tempo, and so on ― but occur they must.
+이러한 위반은 음높이, 리듬, 템포 등의 어느 영역에서든 일어날 수 있지만, 반드시 일어나야 한다.
+**Music** is **organized sound**, but the **organization** has to involve some element of the unexpected or it is emotionally flat and robotic.
+음악은 조직화된 소리이지만, 그 조직에는 예상치 못한 요소가 어느 정도 포함되어야 하며 그렇지 않으면 정서적으로 단조롭고 기계적이다.
+Too much **organization** may **technically** still be **music**, but it would be music that no one wants to listen to.
+조직화가 지나치게 많으면 기술적으로는 여전히 음악일 수 있지만, 아무도 듣고 싶어 하지 않는 음악일 것이다.
+-> The **brain** models **anticipated musical patterns**, which creates the possibility for emotional impact to arise when musicians break these patterns, making music **engaging**
+뇌는 예상되는 음악적 패턴을 모델링하며, 이는 음악가들이 이러한 패턴을 깨뜨릴 때 감정적 영향이 발생할 가능성을 만들어 음악을 흥미롭게 만든다.
