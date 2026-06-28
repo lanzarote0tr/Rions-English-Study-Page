@@ -22,39 +22,44 @@
     <div id="page-root">
         <div class="main-wrapper">
             <div class="study-container">
-                <div class="study-title-wrapper">
+                <header class="app-header study-title-wrapper">
                     {% if text["random_image_url"] %}
-                    <div class="title-image">
+                    <div class="app-header-media title-image">
                         <img src="{{ text["random_image_url"] }}" alt="Random image thumbnail">
                     </div>
                     {% endif %}
-                    <h1 class="study-title">{{ text["title"] }}</h1>
+                    <h1 class="app-header-title study-title">{{ text["title"] }}</h1>
                     {% if text["parent_dir_path"] %}
-                    <a class="back-link" id="backLink" href="{{ url_for('select_page', subdirectory=text["parent_dir_path"]) }}">&laquo; 목록으로 (Shift+E)</a>
+                    <a class="app-header-action back-link" id="backLink" href="{{ url_for('select_page', subdirectory=text["parent_dir_path"]) }}">&laquo; 목록으로 (Shift+E)</a>
                     {% else %}
-                    <a class="back-link" id="backLink" href="{{ url_for('select_page') }}">&laquo; 목록으로 (Shift+E)</a>
+                    <a class="app-header-action back-link" id="backLink" href="{{ url_for('select_page') }}">&laquo; 목록으로 (Shift+E)</a>
                     {% endif %}
-                </div>
-                <div class="study-mode-tabs">
-                    <a class="study-mode-button{% if mode == 'practice' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"]) }}">글쓰기</a>
-                    <a class="study-mode-button{% if mode == 'fill' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"], mode='fill') }}">단어 채우기</a>
-                    <a class="study-mode-button{% if mode == 'line' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"], mode='line') }}">한줄 해석</a>
-                </div>
+                </header>
                 <div class="study-content-row">
                     <div class="study-main-panel">
                         <div id="text-display" class="text-display{% if mode == 'practice' %} practice-display{% endif %}{% if mode == 'line' %} line-translation-display{% endif %}" {% if mode == 'practice' %}tabindex="0"{% endif %}></div>
+                        <button type="button" class="fullscreen-toggle" id="fullscreenToggle" aria-label="전체화면 전환" title="전체화면">⛶</button>
                         <div class="controls">
                             <div class="navigation-buttons">
+                                <div class="nav-side nav-side-previous">
                                 {% if text["previous_text_path"] %}
                                 <a class="nav-button" id="previousTextLink" href="{{ url_for('study_page', text_path=text["previous_text_path"], mode=mode if mode != 'practice' else None) }}">&laquo; 이전 글</a>
                                 {% else %}
                                 <span></span>
                                 {% endif %}
+                                </div>
+                                <div class="nav-side nav-side-next">
                                 {% if text["next_text_path"] %}
                                 <a class="nav-button" id="nextTextLink" href="{{ url_for('study_page', text_path=text["next_text_path"], mode=mode if mode != 'practice' else None) }}">다음 글 &raquo;</a>
                                 {% else %}
                                 <span></span>
                                 {% endif %}
+                                </div>
+                                <div class="study-mode-tabs">
+                                    <a class="study-mode-button{% if mode == 'practice' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"]) }}">글쓰기</a>
+                                    <a class="study-mode-button{% if mode == 'fill' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"], mode='fill') }}">단어 채우기</a>
+                                    <a class="study-mode-button{% if mode == 'line' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"], mode='line') }}">한줄 해석</a>
+                                </div>
                             </div>
                             <div class="main-controls">
                                 <div class="info"><p id="statusText"></p></div>

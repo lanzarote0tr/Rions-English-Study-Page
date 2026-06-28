@@ -302,7 +302,46 @@
             }
 
             function navigateTo(id) {
+                const link = document.getElementById(id);
+                if (link && typeof link.click === "function") {
+                    link.click();
+                    return;
+                }
                 visitHref(getLinkHref(id));
+            }
+
+            function isModeTransitioning() {
+                return Boolean(window.EnglishStudyModeTransitioning);
+            }
+
+            const fullscreenToggle = document.getElementById("fullscreenToggle");
+            let studyFullscreenActive = false;
+
+            function isStudyFullscreen() {
+                return studyFullscreenActive;
+            }
+
+            function updateFullscreenToggle() {
+                if (!fullscreenToggle) {
+                    return;
+                }
+                const active = isStudyFullscreen();
+                document.body.classList.toggle("study-fullscreen-active", active);
+                fullscreenToggle.setAttribute("aria-pressed", String(active));
+                fullscreenToggle.title = active ? "전체화면 종료" : "전체화면";
+            }
+
+            function handleFullscreenToggle() {
+                if (!fullscreenToggle) {
+                    return;
+                }
+                studyFullscreenActive = !studyFullscreenActive;
+                updateFullscreenToggle();
+            }
+
+            if (fullscreenToggle) {
+                fullscreenToggle.addEventListener("click", handleFullscreenToggle);
+                updateFullscreenToggle();
             }
 
             function initializePracticeMode() {
@@ -316,6 +355,7 @@
                 const cursor = document.getElementById("cursor");
 
                 switchContainer.innerHTML = `
+                    ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글 (Shift+K)</label></div>' : ''}
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-visibility"><span class="slider"></span></label>
                         <label for="toggle-visibility" class="switch-label">미리보기 (Shift+O)</label>
@@ -334,6 +374,7 @@
                 const visibilityToggle = document.getElementById("toggle-visibility");
                 const partialPreviewToggle = document.getElementById("toggle-partial-preview");
                 const darkModeToggle = document.getElementById("darkModeToggle");
+                const koreanToggle = document.getElementById("toggle-korean");
 
                 visibilityToggle.checked = state.settings.practiceReveal;
                 partialPreviewToggle.checked = state.settings.practiceWordHint;
@@ -372,9 +413,31 @@
                 }
 
                 function updateStatus() {
-                    statusText.textContent = currentIndex >= characters.length
-                        ? "완료!"
-                        : "타이핑을 시작하세요. (Shift+K: 한글)";
+                    statusText.textContent = "";
+                }
+
+                function updateKoreanToggle() {
+                    if (!koreanToggle) {
+                        return;
+                    }
+                    koreanToggle.classList.toggle("active", Boolean(state.koreanVisible));
+                    koreanToggle.checked = Boolean(state.koreanVisible);
+                    koreanToggle.setAttribute("aria-pressed", String(Boolean(state.koreanVisible)));
+                }
+
+                function toggleKoreanVisibility() {
+                    if (!koreanText) {
+                        return;
+                    }
+                    state.koreanVisible = !state.koreanVisible;
+                    applyKoreanVisibility(koreanText);
+                    updateKoreanToggle();
+                    scheduleCursorUpdate();
+                    saveTextProgress("practice", {
+                        currentIndex,
+                        typedCharacters,
+                        koreanVisible: state.koreanVisible,
+                    });
                 }
 
                 function updateKoreanHighlight() {
@@ -548,16 +611,7 @@
                         }
                         if (key === "k") {
                             event.preventDefault();
-                            if (koreanText) {
-                                state.koreanVisible = !state.koreanVisible;
-                                applyKoreanVisibility(koreanText);
-                                scheduleCursorUpdate();
-                                saveTextProgress("practice", {
-                                    currentIndex,
-                                    typedCharacters,
-                                    koreanVisible: state.koreanVisible,
-                                });
-                            }
+                            toggleKoreanVisibility();
                             return;
                         }
                         if (key === "o") {
@@ -686,6 +740,9 @@
                 visibilityToggle.addEventListener("change", handleVisibilityChange);
                 partialPreviewToggle.addEventListener("change", handlePartialPreviewChange);
                 darkModeToggle.addEventListener("change", handleDarkModeChange);
+                if (koreanToggle) {
+                    koreanToggle.addEventListener("change", toggleKoreanVisibility);
+                }
                 textDisplay.addEventListener("scroll", handleScroll);
                 document.addEventListener("keydown", handleKeydown);
 
@@ -699,6 +756,7 @@
                     state.koreanVisible = practiceProgress.koreanVisible;
                     applyKoreanVisibility(koreanText);
                 }
+                updateKoreanToggle();
                 skipUntypableCharacters();
                 skipPunctuation();
                 if (Array.isArray(practiceProgress.typedCharacters)) {
@@ -736,7 +794,9 @@
                 updateKoreanHighlight();
                 updateCursor(false);
                 scheduleCursorUpdate();
-                textDisplay.focus();
+                if (!isModeTransitioning()) {
+                    textDisplay.focus();
+                }
 
                 cleanup = () => {
                     persistPracticeProgress();
@@ -749,6 +809,9 @@
                     visibilityToggle.removeEventListener("change", handleVisibilityChange);
                     partialPreviewToggle.removeEventListener("change", handlePartialPreviewChange);
                     darkModeToggle.removeEventListener("change", handleDarkModeChange);
+                    if (koreanToggle) {
+                        koreanToggle.removeEventListener("change", toggleKoreanVisibility);
+                    }
                     textDisplay.removeEventListener("scroll", handleScroll);
                     document.removeEventListener("keydown", handleKeydown);
                 };
@@ -768,6 +831,7 @@
                 cursor.style.opacity = "0";
 
                 switchContainer.innerHTML = `
+                    ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글 (Shift+K)</label></div>' : ''}
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-preview"><span class="slider"></span></label>
                         <label for="toggle-preview" class="switch-label">미리보기 (Shift+H)</label>
@@ -786,6 +850,7 @@
                 const previewToggle = document.getElementById("toggle-preview");
                 const firstLetterToggle = document.getElementById("toggle-first-letter");
                 const darkModeToggle = document.getElementById("darkModeToggle");
+                const koreanToggle = document.getElementById("toggle-korean");
                 const fillProgress = getTextProgress().fill || {};
 
                 previewToggle.checked = state.settings.fillPreview;
@@ -808,10 +873,27 @@
                 }
 
                 function updateStatus() {
-                    const allCorrect = blanks.length > 0 && blanks.every((input) =>
-                        (input.value || "").toLowerCase() === (input.dataset.correct || "").toLowerCase()
-                    );
-                    statusText.textContent = allCorrect ? "완료!" : "빈칸을 채우세요.";
+                    statusText.textContent = "";
+                }
+
+                function updateKoreanToggle() {
+                    if (!koreanToggle) {
+                        return;
+                    }
+                    koreanToggle.classList.toggle("active", Boolean(state.koreanVisible));
+                    koreanToggle.checked = Boolean(state.koreanVisible);
+                    koreanToggle.setAttribute("aria-pressed", String(Boolean(state.koreanVisible)));
+                }
+
+                function toggleKoreanVisibility() {
+                    if (!koreanText) {
+                        return;
+                    }
+                    state.koreanVisible = !state.koreanVisible;
+                    applyKoreanVisibility(koreanText);
+                    updateKoreanToggle();
+                    updateKoreanHighlight();
+                    persistFillProgress();
                 }
 
                 function updateKoreanHighlight() {
@@ -960,12 +1042,7 @@
                         }
                         if (key === "k") {
                             event.preventDefault();
-                            if (koreanText) {
-                                state.koreanVisible = !state.koreanVisible;
-                                applyKoreanVisibility(koreanText);
-                                updateKoreanHighlight();
-                                persistFillProgress();
-                            }
+                            toggleKoreanVisibility();
                             return;
                         }
                         if (key === "h") {
@@ -1060,6 +1137,9 @@
                 previewToggle.addEventListener("change", handlePreviewChange);
                 firstLetterToggle.addEventListener("change", handleFirstLetterChange);
                 darkModeToggle.addEventListener("change", handleDarkModeChange);
+                if (koreanToggle) {
+                    koreanToggle.addEventListener("change", toggleKoreanVisibility);
+                }
                 document.addEventListener("keydown", handleKeydown);
 
                 applyKoreanVisibility(koreanText);
@@ -1067,6 +1147,7 @@
                     state.koreanVisible = fillProgress.koreanVisible;
                     applyKoreanVisibility(koreanText);
                 }
+                updateKoreanToggle();
                 if (Array.isArray(fillProgress.values)) {
                     blanks.forEach((input, index) => {
                         const value = fillProgress.values[index];
@@ -1084,7 +1165,13 @@
                     const savedBlankIndex = Number.isInteger(fillProgress.currentBlankIndex)
                         ? fillProgress.currentBlankIndex
                         : 0;
-                    focusAndScroll(Math.min(Math.max(savedBlankIndex, 0), blanks.length - 1));
+                    currentBlankIndex = Math.min(Math.max(savedBlankIndex, 0), blanks.length - 1);
+                    if (isModeTransitioning()) {
+                        updatePreview();
+                        updateKoreanHighlight();
+                    } else {
+                        focusAndScroll(currentBlankIndex);
+                    }
                 }
 
                 cleanup = () => {
@@ -1097,6 +1184,9 @@
                     previewToggle.removeEventListener("change", handlePreviewChange);
                     firstLetterToggle.removeEventListener("change", handleFirstLetterChange);
                     darkModeToggle.removeEventListener("change", handleDarkModeChange);
+                    if (koreanToggle) {
+                        koreanToggle.removeEventListener("change", toggleKoreanVisibility);
+                    }
                     document.removeEventListener("keydown", handleKeydown);
                 };
                 persistCurrentMode = persistFillProgress;
@@ -1125,7 +1215,6 @@
                 cursor.style.opacity = "0";
                 koreanWidget.innerHTML = "";
                 switchContainer.innerHTML = `
-                    <div class="switch-group line-mode-help">↑/↓ 또는 위아래 슬라이드로 문장 이동</div>
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
                         <label for="darkModeToggle" class="switch-label">다크모드</label>
@@ -1157,9 +1246,7 @@
                 const scene = document.getElementById("line-scene");
 
                 function updateStatus() {
-                    statusText.textContent = maxLineCount
-                        ? `${activeIndex + 1} / ${maxLineCount} 한줄 해석`
-                        : "표시할 문장이 없습니다.";
+                    statusText.textContent = "";
                 }
 
                 function renderScene() {
@@ -1169,7 +1256,7 @@
                     if (!lineEntries.length) {
                         const emptyState = document.createElement("article");
                         emptyState.className = "line-scene-card empty";
-                        emptyState.innerHTML = '<p class="line-empty-text">표시할 문장이 없습니다.</p>';
+                        emptyState.innerHTML = '<p class="line-empty-text"></p>';
                         scene.appendChild(emptyState);
                         return;
                     }
@@ -1422,8 +1509,11 @@
             return () => {
                 persistCurrentMode();
                 cleanup();
+                if (fullscreenToggle) {
+                    fullscreenToggle.removeEventListener("click", handleFullscreenToggle);
+                }
                 window.removeEventListener("pagehide", handlePageHide);
-                document.body.classList.remove("hide-upcoming", "korean-visible", "line-mode-active");
+                document.body.classList.remove("hide-upcoming", "korean-visible", "line-mode-active", "study-fullscreen-active");
             };
         },
     };

@@ -22,6 +22,16 @@
     --panel-separator: rgba(0, 0, 0, 0.08);
     --control-frost: rgba(255, 255, 255, 0.72);
     --control-frost-clear: rgba(255, 255, 255, 0);
+    --app-header-min-height: 58px;
+    --app-header-padding-y: 8px;
+    --app-header-padding-x: clamp(16px, 2.2vw, 28px);
+    --app-header-title-size: clamp(1.18rem, 0.96rem + 0.9vw, 1.78rem);
+    --app-header-title-mobile-size: 1.12rem;
+    --app-header-title-line-height: 1.24;
+    --app-header-icon-size: 36px;
+    --page-transition-fast: 0.32s;
+    --page-transition-normal: 0.46s;
+    --page-transition-ease: cubic-bezier(0.22, 1, 0.36, 1);
     color-scheme: light;
 }
 
@@ -50,28 +60,6 @@ html.dark-mode {
     --control-frost: rgba(44, 44, 44, 0.72);
     --control-frost-clear: rgba(44, 44, 44, 0);
     color-scheme: dark;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 html,
@@ -104,6 +92,38 @@ button {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.app-header {
+    width: 100%;
+    min-height: var(--app-header-min-height);
+    padding: var(--app-header-padding-y) var(--app-header-padding-x);
+    border-bottom: 1px solid var(--panel-separator);
+    box-sizing: border-box;
+    background: var(--card-bg);
+    transform: translateY(0);
+    opacity: 1;
+    transition: opacity var(--page-transition-fast) ease, transform var(--page-transition-normal) var(--page-transition-ease);
+}
+
+.app-header > * {
+    transition: opacity var(--page-transition-fast) ease, transform var(--page-transition-normal) var(--page-transition-ease);
+}
+
+.app-header-title {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text-color);
+    font-size: var(--app-header-title-size);
+    font-weight: 700;
+    line-height: var(--app-header-title-line-height);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-header-action {
+    justify-self: end;
 }
 
 .switch {
@@ -158,8 +178,6 @@ input:checked + .slider::before {
     box-shadow: 0 8px 30px var(--shadow-color);
     text-align: center;
     color: var(--text-color-light);
-    opacity: 0;
-    animation: fadeIn 0.4s ease-out forwards;
 }
 
 .status-card h2 {

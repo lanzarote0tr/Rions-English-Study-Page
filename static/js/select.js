@@ -221,11 +221,12 @@
             }
 
             function refreshCurrentFolder() {
+                const selectUrl = `/select/${encodePath(currentPath)}`;
                 if (window.EnglishStudyNavigation && typeof window.EnglishStudyNavigation.visit === "function") {
-                    window.EnglishStudyNavigation.visit(window.location.href, { history: "replace" });
+                    window.EnglishStudyNavigation.visit(selectUrl, { history: "none" });
                     return;
                 }
-                window.location.reload();
+                window.location.href = selectUrl;
             }
 
             function openUploadPanel() {

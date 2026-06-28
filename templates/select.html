@@ -21,16 +21,16 @@
 <body class="page-select" data-page="select">
     <div id="page-root" data-current-path="{{ browse["current_path"] }}">
         <div class="page-shell">
-            <div class="title-wrapper">
-                <h2 class="site-title">Rion's English Study Page</h2>
-                <div class="profile-container">
+            <header class="app-header title-wrapper">
+                <h2 class="app-header-title site-title">Rion's English Study Page</h2>
+                <div class="app-header-action profile-container">
                     <img src="{{ url_for('static', filename='img/rion.png') }}" alt="Profile" class="profile-pic" id="profilePic">
                     <div class="profile-info" id="profileInfo">
                         <span class="bold">Developed by 김리온(2-5), Gemini 3, Codex 5.4</span><br>
                         <span class="bold">Donate:</span> 7777-02-8261429 카카오뱅크
                     </div>
                 </div>
-            </div>
+            </header>
             <div class="select-container">
                 {% if browse["random_image_url"] %}
                 <div class="image-header">
