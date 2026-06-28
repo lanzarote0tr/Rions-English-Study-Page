@@ -202,7 +202,11 @@ def _get_random_image_url() -> str | None:
     if not IMAGE_DIR.exists():
         return None
 
-    image_files = [image.name for image in IMAGE_DIR.iterdir() if image.is_file()]
+    image_files = [
+        image.name
+        for image in IMAGE_DIR.iterdir()
+        if image.is_file() and image.stem.lower() != "rion"
+    ]
     if not image_files:
         return None
 

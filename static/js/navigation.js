@@ -76,7 +76,19 @@
         return "forward";
     }
 
-    async function closeKoreanPanelBeforeStudyModeTransition() {
+    function getStudyTextNavChanges(currentRoot, nextRoot) {
+        return {
+            previous: Boolean(currentRoot.querySelector("#previousTextLink")) !== Boolean(nextRoot.querySelector("#previousTextLink")),
+            next: Boolean(currentRoot.querySelector("#nextTextLink")) !== Boolean(nextRoot.querySelector("#nextTextLink")),
+        };
+    }
+
+    function applyStudyTextNavChangeClasses(root, changes) {
+        root.classList.toggle("nav-change-previous", Boolean(changes.previous));
+        root.classList.toggle("nav-change-next", Boolean(changes.next));
+    }
+
+    async function closeKoreanPanelBeforeStudyTransition() {
         if (!document.body.classList.contains("korean-visible")) {
             return;
         }
@@ -162,6 +174,29 @@
         return "none";
     }
 
+    async function crossfadeSelectContent(currentContainer, nextContainer) {
+        const currentContent = currentContainer.querySelector(".content-wrapper");
+        const nextContent = nextContainer.querySelector(".content-wrapper");
+        if (!currentContent || !nextContent) {
+            await wait(180);
+            return;
+        }
+
+        const currentLayer = currentContent.cloneNode(true);
+        const nextLayer = nextContent.cloneNode(true);
+        currentLayer.className = "select-content-layer select-content-current";
+        nextLayer.className = "select-content-layer select-content-next";
+
+        const stage = document.createElement("div");
+        stage.className = "select-content-crossfade";
+        stage.append(currentLayer, nextLayer);
+        currentContent.append(stage);
+        currentContent.classList.add("select-content-transitioning");
+        currentContent.offsetHeight;
+        stage.classList.add("is-crossfading");
+        await wait(460);
+    }
+
     function animateSelectCardsIn(container) {
         const items = [...container.querySelectorAll(".file-list li")];
         items.forEach((item, index) => {
@@ -214,20 +249,16 @@
         document.body.dataset.page = nextDocument.body.dataset.page || "";
         currentRoot.dataset.currentPath = nextRoot.dataset.currentPath || "";
 
-        currentContainer.classList.add("is-menu-transitioning", "is-menu-leaving");
-        const [, imageTransition] = await Promise.all([
-            wait(340),
+        currentContainer.classList.add("is-menu-transitioning");
+        await Promise.all([
             crossfadeSelectImage(currentContainer, nextContainer),
+            crossfadeSelectContent(currentContainer, nextContainer),
         ]);
 
         currentCleanup();
         currentContainer.replaceWith(nextContainer);
         updatePageContext(nextDocument.body.dataset.page || "", finalUrl);
         initCurrentPage();
-        if (imageTransition === "enter") {
-            animateSelectImageIn(nextContainer);
-        }
-        animateSelectCardsIn(nextContainer);
         return true;
     }
 
@@ -298,7 +329,7 @@
 
         const direction = getStudyModeDirection(currentMode, nextMode);
         document.title = nextDocument.title;
-        await closeKoreanPanelBeforeStudyModeTransition();
+        await closeKoreanPanelBeforeStudyTransition();
         currentRoot.classList.add(`mode-exit-${direction}`);
         await wait(220);
 
@@ -346,10 +377,14 @@
         }
 
         const direction = getStudyTextDirection(sourceLink);
+        const navChanges = getStudyTextNavChanges(currentRoot, nextRoot);
+        await closeKoreanPanelBeforeStudyTransition();
+        applyStudyTextNavChangeClasses(currentRoot, navChanges);
         currentRoot.classList.add(`text-exit-${direction}`);
         await wait(240);
 
         document.title = nextDocument.title;
+        applyStudyTextNavChangeClasses(nextRoot, navChanges);
         nextRoot.classList.add(`text-enter-${direction}`);
         currentCleanup();
         const insertedRoot = updateBodyFromDocument(nextDocument);
@@ -359,6 +394,7 @@
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
                 insertedRoot.classList.remove(`text-enter-${direction}`);
+                insertedRoot.classList.remove("nav-change-previous", "nav-change-next");
             });
         });
         return true;

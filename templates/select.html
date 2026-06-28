@@ -23,13 +23,6 @@
         <div class="page-shell">
             <header class="app-header title-wrapper">
                 <h2 class="app-header-title site-title">Rion's English Study Page</h2>
-                <div class="app-header-action profile-container">
-                    <img src="{{ url_for('static', filename='img/rion.png') }}" alt="Profile" class="profile-pic" id="profilePic">
-                    <div class="profile-info" id="profileInfo">
-                        <span class="bold">Developed by 김리온(2-5), Gemini 3, Codex 5.4</span><br>
-                        <span class="bold">Donate:</span> 7777-02-8261429 카카오뱅크
-                    </div>
-                </div>
             </header>
             <div class="select-container">
                 {% if browse["random_image_url"] %}
@@ -42,23 +35,26 @@
                         <div class="navigation">
                             {% if browse["parent_path"] is not none %}
                                 {% if browse["parent_path"] %}
-                                <a class="back-button" href="{{ url_for('select_page', subdirectory=browse["parent_path"]) }}">&laquo; 뒤로 가기</a>
+                                <a class="back-button" href="{{ url_for('select_page', subdirectory=browse["parent_path"]) }}">&larr; 상위 폴더</a>
                                 {% else %}
-                                <a class="back-button" href="{{ url_for('select_page') }}">&laquo; 맨 위로</a>
+                                <a class="back-button" href="{{ url_for('select_page') }}">&larr; 홈으로</a>
                                 {% endif %}
                             {% endif %}
                             <div class="breadcrumbs">
-                                <a href="{{ url_for('select_page') }}">Home</a>
+                                <a href="{{ url_for('select_page') }}">홈</a>
                                 {% for crumb in browse["breadcrumbs"] %}
                                 <span>/</span>
                                 <a href="{{ url_for('select_page', subdirectory=crumb["path"]) }}">{{ crumb["name"] }}</a>
                                 {% endfor %}
                             </div>
                         </div>
-                        <label class="switch">
-                            <input type="checkbox" id="darkModeToggle">
-                            <span class="slider"></span>
-                        </label>
+                        <div class="select-theme-control">
+                            <span>다크모드</span>
+                            <label class="switch" aria-label="다크모드">
+                                <input type="checkbox" id="darkModeToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                     </div>
                     <details class="upload-panel" id="uploadPanel">
                         <summary class="upload-toggle" aria-controls="uploadContents" aria-expanded="false">업로드</summary>
@@ -138,6 +134,13 @@ The repair work will end next Friday.
                             {% endif %}
                         </ul>
                     </div>
+                </div>
+            </div>
+            <div class="profile-container floating-profile">
+                <img src="{{ url_for('static', filename='img/rion.png') }}" alt="Profile" class="profile-pic" id="profilePic">
+                <div class="profile-info" id="profileInfo">
+                    <span class="bold">Developed by 김리온(2-5), Gemini 3, Codex 5.4</span><br>
+                    <span class="bold">Donate:</span> 7777-02-8261429 카카오뱅크
                 </div>
             </div>
         </div>
