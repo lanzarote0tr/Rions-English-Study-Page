@@ -1,24 +1,10 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ text["title"] }} - Rion's English Study Page</title>
-    <script>
-        (function () {
-            try {
-                var saved = JSON.parse(localStorage.getItem("englishStudySettings") || "{}");
-                if (saved.darkMode) {
-                    document.documentElement.classList.add("dark-mode");
-                }
-            } catch (error) {}
-        }());
-    </script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/select.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/study.css') }}">
-</head>
-<body class="page-study{% if mode == 'line' %} line-mode-active{% endif %}" data-page="study">
+{% extends "base.html" %}
+
+{% block title %}{{ text["title"] }} - Rion's English Study Page{% endblock %}
+{% block body_class %}page-study{% if mode == 'line' %} line-mode-active{% endif %}{% endblock %}
+{% block page_key %}study{% endblock %}
+
+{% block body %}
     <div id="page-root">
         <div class="main-wrapper">
             <div class="study-container">
@@ -69,8 +55,4 @@
         <div id="cursor" class="cursor"></div>
         <script id="study-data" type="application/json">{{ {"text": text, "mode": mode}|tojson }}</script>
     </div>
-    <script src="{{ url_for('static', filename='js/select.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/study.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
-</body>
-</html>
+{% endblock %}

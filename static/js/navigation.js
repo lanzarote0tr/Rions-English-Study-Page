@@ -9,6 +9,7 @@
         previousStudyTextPath: "englishStudyPreviousStudyTextPath",
     };
     const studyModeOrder = ["practice", "fill", "line"];
+    const normalizeStudyMode = window.EnglishStudy.text.normalizeStudyMode;
 
     function isSameOrigin(url) {
         return url.origin === window.location.origin;
@@ -42,13 +43,6 @@
         return new Promise((resolve) => {
             window.setTimeout(resolve, ms);
         });
-    }
-
-    function normalizeStudyMode(mode) {
-        if (mode === "fill" || mode === "line") {
-            return mode;
-        }
-        return "practice";
     }
 
     function readStudyData(sourceDocument) {

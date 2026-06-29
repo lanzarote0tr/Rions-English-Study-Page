@@ -1,24 +1,10 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rion's English Study Page</title>
-    <script>
-        (function () {
-            try {
-                var saved = JSON.parse(localStorage.getItem("englishStudySettings") || "{}");
-                if (saved.darkMode) {
-                    document.documentElement.classList.add("dark-mode");
-                }
-            } catch (error) {}
-        }());
-    </script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/select.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/study.css') }}">
-</head>
-<body class="page-select" data-page="select">
+{% extends "base.html" %}
+
+{% block title %}Rion's English Study Page{% endblock %}
+{% block body_class %}page-select{% endblock %}
+{% block page_key %}select{% endblock %}
+
+{% block body %}
     <div id="page-root" data-current-path="{{ browse["current_path"] }}">
         <div class="page-shell">
             <header class="app-header title-wrapper">
@@ -145,8 +131,4 @@ The repair work will end next Friday.
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/select.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/study.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
-</body>
-</html>
+{% endblock %}

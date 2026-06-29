@@ -1,30 +1,18 @@
 (function () {
-    const defaultSettings = {
-        darkMode: false,
-        practiceReveal: true,
-        practiceWordHint: false,
-        fillPreview: false,
-        fillFirstLetter: false,
-    };
+    const core = window.EnglishStudy;
     const studyProgressStorageKey = "englishStudyProgress";
-    const localTextPrefix = "__local__/";
+    const localTextPrefix = core.local.prefix;
     const studyPageContextKeys = {
         previousPage: "englishStudyPreviousPage",
         previousStudyTextPath: "englishStudyPreviousStudyTextPath",
     };
-
-    function loadSettings() {
-        try {
-            const saved = JSON.parse(localStorage.getItem("englishStudySettings") || "{}");
-            return { ...defaultSettings, ...saved };
-        } catch (error) {
-            return { ...defaultSettings };
-        }
-    }
-
-    function saveSettings(settings) {
-        localStorage.setItem("englishStudySettings", JSON.stringify(settings));
-    }
+    const loadSettings = core.settings.load;
+    const saveSettings = core.settings.save;
+    const normalizeStudyMode = core.text.normalizeStudyMode;
+    const applyTheme = core.theme.apply;
+    const updateDarkModeToggle = core.theme.updateDarkModeToggle;
+    const escapeHtml = core.html.escape;
+    const parseLocalTextContent = core.local.parseTextContent;
 
     function loadStudyProgress() {
         try {
@@ -47,35 +35,6 @@
         } catch (error) {
             return { page: "", textPath: "" };
         }
-    }
-
-    function normalizeStudyMode(mode) {
-        if (mode === "fill" || mode === "line") {
-            return mode;
-        }
-        return "practice";
-    }
-
-    function applyTheme(settings) {
-        document.documentElement.classList.toggle("dark-mode", Boolean(settings.darkMode));
-        document.body.classList.toggle("dark-mode", Boolean(settings.darkMode));
-    }
-
-    function updateDarkModeToggle(settings) {
-        const toggle = document.getElementById("darkModeToggle");
-        if (toggle) {
-            toggle.checked = settings.darkMode;
-        }
-    }
-
-    function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, (char) => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;",
-        }[char]));
     }
 
     function isAlphaNum(char) {
@@ -158,37 +117,6 @@
             return linePairs.map((pair) => pair.korean || "");
         }
         return splitIntoSentences(koreanText).sentences;
-    }
-
-    function containsHangul(text) {
-        return /[가-힣]/.test(text);
-    }
-
-    function parseLocalTextContent(rawText) {
-        const normalized = String(rawText || "").replace(/\ufeff/g, "").trim();
-        const lines = normalized.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-        if (lines.length >= 2 && lines.length % 2 === 0) {
-            const englishLines = lines.filter((_, index) => index % 2 === 0);
-            const koreanLines = lines.filter((_, index) => index % 2 === 1);
-            const alternating = englishLines.every((line) => !containsHangul(line))
-                && koreanLines.every((line) => containsHangul(line));
-            if (alternating) {
-                return {
-                    english_content: englishLines.join("\n"),
-                    korean_content: koreanLines.join("\n"),
-                    line_pairs: englishLines.map((english, index) => ({
-                        english,
-                        korean: koreanLines[index] || "",
-                    })),
-                };
-            }
-        }
-
-        return {
-            english_content: lines.join("\n"),
-            korean_content: "",
-            line_pairs: [],
-        };
     }
 
     function resolveLocalTextPayload(text) {
@@ -312,6 +240,47 @@
 
             function isModeTransitioning() {
                 return Boolean(window.EnglishStudyModeTransitioning);
+            }
+
+            const studyModeButtons = [...document.querySelectorAll(".study-mode-button")];
+
+            function navigateStudyMode(offset) {
+                const modes = ["practice", "fill", "line"];
+                const currentIndex = modes.indexOf(state.mode);
+                if (currentIndex < 0) {
+                    return;
+                }
+                const nextIndex = Math.min(Math.max(currentIndex + offset, 0), modes.length - 1);
+                if (nextIndex === currentIndex) {
+                    return;
+                }
+                const target = studyModeButtons[nextIndex];
+                if (target && typeof target.click === "function") {
+                    target.click();
+                }
+            }
+
+            function handleCommonStudyShortcut(event) {
+                if (!event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) {
+                    return false;
+                }
+                const key = event.key.toLowerCase();
+                if (key === "f") {
+                    event.preventDefault();
+                    handleFullscreenToggle();
+                    return true;
+                }
+                if (event.key === "<" || event.code === "Comma") {
+                    event.preventDefault();
+                    navigateStudyMode(-1);
+                    return true;
+                }
+                if (event.key === ">" || event.code === "Period") {
+                    event.preventDefault();
+                    navigateStudyMode(1);
+                    return true;
+                }
+                return false;
             }
 
             const fullscreenToggle = document.getElementById("fullscreenToggle");
@@ -602,6 +571,9 @@
                 }
 
                 function handleKeydown(event) {
+                    if (handleCommonStudyShortcut(event)) {
+                        return;
+                    }
                     if (event.shiftKey) {
                         const key = event.key.toLowerCase();
                         if (key === "e") {
@@ -1009,6 +981,9 @@
 
                 function handleInput(event) {
                     const input = event.target;
+                    if (!input.classList.contains("blank-input")) {
+                        return;
+                    }
                     const answer = (input.dataset.correct || "").toLowerCase();
                     const value = (input.value || "").toLowerCase();
                     input.classList.toggle("correct", value === answer);
@@ -1018,12 +993,18 @@
                 }
 
                 function handleFocus(event) {
+                    if (!event.target.classList.contains("blank-input")) {
+                        return;
+                    }
                     currentBlankIndex = blanks.indexOf(event.target);
                     updatePreview();
                     updateKoreanHighlight();
                 }
 
-                function handleBlur() {
+                function handleBlur(event) {
+                    if (!event.target.classList.contains("blank-input")) {
+                        return;
+                    }
                     setTimeout(() => {
                         if (!textDisplay.contains(document.activeElement)) {
                             currentBlankIndex = -1;
@@ -1033,6 +1014,9 @@
                 }
 
                 function handleKeydown(event) {
+                    if (handleCommonStudyShortcut(event)) {
+                        return;
+                    }
                     if (event.shiftKey) {
                         const key = event.key.toLowerCase();
                         if (key === "e") {
@@ -1128,11 +1112,9 @@
                 }
 
                 renderText();
-                blanks.forEach((input) => {
-                    input.addEventListener("input", handleInput);
-                    input.addEventListener("focus", handleFocus);
-                    input.addEventListener("blur", handleBlur);
-                });
+                textDisplay.addEventListener("input", handleInput);
+                textDisplay.addEventListener("focusin", handleFocus);
+                textDisplay.addEventListener("focusout", handleBlur);
 
                 previewToggle.addEventListener("change", handlePreviewChange);
                 firstLetterToggle.addEventListener("change", handleFirstLetterChange);
@@ -1176,11 +1158,9 @@
 
                 cleanup = () => {
                     persistFillProgress();
-                    blanks.forEach((input) => {
-                        input.removeEventListener("input", handleInput);
-                        input.removeEventListener("focus", handleFocus);
-                        input.removeEventListener("blur", handleBlur);
-                    });
+                    textDisplay.removeEventListener("input", handleInput);
+                    textDisplay.removeEventListener("focusin", handleFocus);
+                    textDisplay.removeEventListener("focusout", handleBlur);
                     previewToggle.removeEventListener("change", handlePreviewChange);
                     firstLetterToggle.removeEventListener("change", handleFirstLetterChange);
                     darkModeToggle.removeEventListener("change", handleDarkModeChange);
@@ -1343,6 +1323,9 @@
                 }
 
                 function handleKeydown(event) {
+                    if (handleCommonStudyShortcut(event)) {
+                        return;
+                    }
                     if (event.shiftKey && event.key.toLowerCase() === "e") {
                         event.preventDefault();
                         navigateTo("backLink");
