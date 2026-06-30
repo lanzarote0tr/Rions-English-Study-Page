@@ -190,7 +190,7 @@ def image_names(signature: tuple[int, int]) -> tuple[str, ...]:
     return tuple(
         image.name
         for image in IMAGE_DIR.iterdir()
-        if image.is_file() and image.stem.lower() != "rion"
+        if image.is_file() and image.stem.lower() != "rion" and image.name.lower() != "clear.gif"
     )
 
 

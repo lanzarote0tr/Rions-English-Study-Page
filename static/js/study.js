@@ -195,6 +195,13 @@
 
             let cleanup = () => {};
             let persistCurrentMode = () => {};
+            let completionNoticeTimer = null;
+            let completionConfetti = null;
+            const completionMessages = {
+                practice: "글쓰기 완료!",
+                fill: "단어 채우기 완료!",
+                line: "한줄해석 완료!",
+            };
 
             const studyTitle = document.querySelector(".study-title");
             if (studyTitle) {
@@ -218,6 +225,265 @@
                     [mode]: payload,
                 };
                 saveStudyProgress(state.progress);
+            }
+
+            function markCompletionNoticeShown(mode) {
+                const textProgress = getTextProgress();
+                const completionNotices = {
+                    ...(textProgress.completionNotices || {}),
+                };
+                if (completionNotices[mode]) {
+                    return false;
+                }
+                completionNotices[mode] = true;
+                state.progress[state.text.text_path] = {
+                    ...textProgress,
+                    completionNotices,
+                };
+                saveStudyProgress(state.progress);
+                return true;
+            }
+
+            function getCompletionConfetti() {
+                if (completionConfetti) {
+                    return completionConfetti;
+                }
+
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                const particles = [];
+                const colors = ["#ff5f8f", "#ffb54b", "#ffe77b", "#70e2c7", "#7bb9ff", "#b68cff", "#ffffff"];
+                let dpr = Math.min(window.devicePixelRatio || 1, 2);
+                let width = 0;
+                let height = 0;
+                let last = performance.now();
+                let frameId = null;
+
+                canvas.className = "completion-confetti-canvas";
+                canvas.setAttribute("aria-hidden", "true");
+                document.body.appendChild(canvas);
+
+                function resize() {
+                    dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    width = window.innerWidth;
+                    height = window.innerHeight;
+                    canvas.width = Math.round(width * dpr);
+                    canvas.height = Math.round(height * dpr);
+                    canvas.style.width = `${width}px`;
+                    canvas.style.height = `${height}px`;
+                    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+                }
+
+                class Paper {
+                    constructor(x, y, options = {}) {
+                        const angle = options.angle ?? (Math.random() * Math.PI * 2);
+                        const speed = options.speed ?? (3.8 + Math.random() * 7.2);
+                        this.x = x;
+                        this.y = y;
+                        this.vx = Math.cos(angle) * speed + (Math.random() - 0.5) * 1.7;
+                        this.vy = Math.sin(angle) * speed - (1.3 + Math.random() * 1.4);
+                        this.w = 5 + Math.random() * 7;
+                        this.h = 8 + Math.random() * 11;
+                        this.rotation = Math.random() * Math.PI;
+                        this.spin = (Math.random() - 0.5) * 0.55;
+                        this.wobble = Math.random() * Math.PI * 2;
+                        this.wobbleSpeed = 0.08 + Math.random() * 0.15;
+                        this.color = colors[(Math.random() * colors.length) | 0];
+                        this.life = 0;
+                        this.maxLife = 165 + Math.random() * 105;
+                        this.alpha = 1;
+                    }
+
+                    update(dt) {
+                        const time = dt / 16.67;
+                        this.life += time;
+                        this.wobble += this.wobbleSpeed * time;
+                        this.vx += Math.sin(this.wobble) * 0.026 * time;
+                        this.vx *= Math.pow(0.992, time);
+                        this.vy += 0.165 * time;
+                        this.vy *= Math.pow(0.998, time);
+                        this.x += this.vx * time;
+                        this.y += this.vy * time;
+                        this.rotation += this.spin * time;
+
+                        if (this.y + this.h > height - 2) {
+                            this.y = height - 2 - this.h;
+                            this.vy *= -0.38;
+                            this.vx *= 0.72;
+                            this.spin *= 0.82;
+                        }
+                        if (this.x < -40 || this.x > width + 40 || this.life > this.maxLife) {
+                            return false;
+                        }
+                        this.alpha = Math.max(0, 1 - Math.max(0, this.life - this.maxLife * 0.72) / (this.maxLife * 0.28));
+                        return true;
+                    }
+
+                    draw() {
+                        context.save();
+                        context.translate(this.x, this.y);
+                        context.rotate(this.rotation + Math.sin(this.wobble) * 0.38);
+                        context.globalAlpha = this.alpha;
+                        context.fillStyle = this.color;
+                        context.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+                        context.globalAlpha = this.alpha * 0.28;
+                        context.fillStyle = "#ffffff";
+                        context.fillRect(-this.w / 2, -this.h / 2, this.w, Math.max(1.2, this.h * 0.16));
+                        context.restore();
+                    }
+                }
+
+                function emitAround(element, amount = 190) {
+                    if (!element) {
+                        return;
+                    }
+
+                    const rect = element.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const perimeter = 2 * (rect.width + rect.height);
+
+                    for (let index = 0; index < amount; index += 1) {
+                        const edge = Math.random() * perimeter;
+                        let x;
+                        let y;
+                        let normalX;
+                        let normalY;
+
+                        if (edge < rect.width) {
+                            x = rect.left + edge;
+                            y = rect.top;
+                            normalX = 0;
+                            normalY = -1;
+                        } else if (edge < rect.width + rect.height) {
+                            x = rect.right;
+                            y = rect.top + (edge - rect.width);
+                            normalX = 1;
+                            normalY = 0;
+                        } else if (edge < 2 * rect.width + rect.height) {
+                            x = rect.right - (edge - rect.width - rect.height);
+                            y = rect.bottom;
+                            normalX = 0;
+                            normalY = 1;
+                        } else {
+                            x = rect.left;
+                            y = rect.bottom - (edge - 2 * rect.width - rect.height);
+                            normalX = -1;
+                            normalY = 0;
+                        }
+
+                        const dx = x - centerX;
+                        const dy = y - centerY;
+                        const length = Math.hypot(dx, dy) || 1;
+                        const outwardX = dx / length;
+                        const outwardY = dy / length;
+                        const direction = Math.atan2(outwardY * 0.65 + normalY * 0.8, outwardX * 0.65 + normalX * 0.8);
+                        particles.push(new Paper(x + normalX * 6, y + normalY * 6, {
+                            angle: direction + (Math.random() - 0.5) * 1.3,
+                            speed: 4.2 + Math.random() * 7.3,
+                        }));
+                    }
+
+                    const centerAmount = Math.floor(amount * 0.18);
+                    for (let index = 0; index < centerAmount; index += 1) {
+                        particles.push(new Paper(centerX, centerY, {
+                            angle: (Math.PI * 2 * index) / centerAmount + (Math.random() - 0.5) * 0.22,
+                            speed: 2.8 + Math.random() * 5.2,
+                        }));
+                    }
+                }
+
+                function frame(now) {
+                    const dt = Math.min(34, now - last);
+                    last = now;
+                    context.clearRect(0, 0, width, height);
+
+                    for (let index = particles.length - 1; index >= 0; index -= 1) {
+                        if (!particles[index].update(dt)) {
+                            particles.splice(index, 1);
+                        } else {
+                            particles[index].draw();
+                        }
+                    }
+
+                    frameId = particles.length ? requestAnimationFrame(frame) : null;
+                }
+
+                function burst(element, amount = 190) {
+                    emitAround(element, amount);
+                    if (!frameId && particles.length) {
+                        last = performance.now();
+                        frameId = requestAnimationFrame(frame);
+                    }
+                }
+
+                function destroy() {
+                    if (frameId) {
+                        cancelAnimationFrame(frameId);
+                    }
+                    window.removeEventListener("resize", resize);
+                    canvas.remove();
+                    particles.length = 0;
+                    completionConfetti = null;
+                }
+
+                window.addEventListener("resize", resize, { passive: true });
+                resize();
+                completionConfetti = { burst, destroy };
+                return completionConfetti;
+            }
+
+            function showCompletionPopup(message) {
+                const pageRoot = document.getElementById("page-root");
+                if (!pageRoot) {
+                    return;
+                }
+
+                let notice = document.getElementById("completionNotice");
+                if (!notice) {
+                    notice = document.createElement("div");
+                    notice.id = "completionNotice";
+                    notice.className = "completion-notice";
+                    notice.setAttribute("role", "status");
+                    notice.setAttribute("aria-live", "polite");
+                    pageRoot.appendChild(notice);
+                }
+
+                notice.innerHTML = "";
+                const image = document.createElement("img");
+                image.className = "completion-notice-image";
+                image.src = "/static/img/clear.gif";
+                image.alt = "";
+                image.setAttribute("aria-hidden", "true");
+
+                const text = document.createElement("span");
+                text.className = "completion-notice-text";
+                text.textContent = message;
+
+                notice.append(image, text);
+                if (completionNoticeTimer !== null) {
+                    window.clearTimeout(completionNoticeTimer);
+                    completionNoticeTimer = null;
+                }
+
+                notice.classList.remove("visible");
+                void notice.offsetHeight;
+                notice.classList.add("visible");
+                requestAnimationFrame(() => {
+                    getCompletionConfetti().burst(notice, 280);
+                });
+                completionNoticeTimer = window.setTimeout(() => {
+                    notice.classList.remove("visible");
+                    completionNoticeTimer = null;
+                }, 4000);
+            }
+
+            function showModeCompletionNotice(mode) {
+                const message = completionMessages[mode];
+                if (!message || !markCompletionNoticeShown(mode)) {
+                    return;
+                }
+                showCompletionPopup(message);
             }
 
             function applyKoreanVisibility(hasKorean) {
@@ -360,17 +626,22 @@
                 let currentIndex = 0;
                 let cursorFrame = null;
                 let resizeObserver = null;
+                let activeCharacter = null;
+                let activeKoreanSentenceIndex = -1;
+                const previewedCharacters = new Set();
 
-                textDisplay.appendChild(cursor);
                 cursor.style.opacity = "0";
                 cursor.style.transform = "translate3d(0, 0, 0)";
 
+                const textFragment = document.createDocumentFragment();
                 englishText.split("").forEach((char) => {
                     const span = document.createElement("span");
                     span.textContent = char;
-                    textDisplay.insertBefore(span, cursor);
+                    textFragment.appendChild(span);
                     characters.push(span);
                 });
+                textDisplay.appendChild(textFragment);
+                textDisplay.appendChild(cursor);
 
                 if (koreanText) {
                     getTranslationLines(linePairs, koreanText).forEach((sentence) => {
@@ -402,11 +673,7 @@
                     applyKoreanVisibility(koreanText);
                     updateKoreanToggle();
                     scheduleCursorUpdate();
-                    saveTextProgress("practice", {
-                        currentIndex,
-                        typedCharacters,
-                        koreanVisible: state.koreanVisible,
-                    });
+                    persistPracticeProgress();
                 }
 
                 function updateKoreanHighlight() {
@@ -417,42 +684,73 @@
                     if (sentenceIndex < 0) {
                         return;
                     }
-                    koreanSentences.forEach((span, index) => {
-                        const active = index === sentenceIndex;
-                        span.classList.toggle("highlight", active);
-                        if (active && document.body.classList.contains("korean-visible")) {
-                            span.scrollIntoView({ behavior: "smooth", block: "center" });
+                    if (activeKoreanSentenceIndex !== sentenceIndex) {
+                        if (koreanSentences[activeKoreanSentenceIndex]) {
+                            koreanSentences[activeKoreanSentenceIndex].classList.remove("highlight");
                         }
-                    });
-                }
-
-                function skipUntypableCharacters() {
-                    while (currentIndex < characters.length) {
-                        const charCode = englishText[currentIndex].charCodeAt(0);
-                        if (charCode > 126 || (charCode < 32 && charCode !== 9 && charCode !== 10)) {
-                            characters[currentIndex].classList.add("correct");
-                            currentIndex += 1;
-                        } else {
-                            break;
+                        if (koreanSentences[sentenceIndex]) {
+                            koreanSentences[sentenceIndex].classList.add("highlight");
                         }
+                        activeKoreanSentenceIndex = sentenceIndex;
+                    }
+                    if (document.body.classList.contains("korean-visible") && koreanSentences[sentenceIndex]) {
+                        koreanSentences[sentenceIndex].scrollIntoView({ behavior: "smooth", block: "center" });
                     }
                 }
 
-                function skipPunctuation() {
-                    while (currentIndex < characters.length && punctuationToSkip.includes(englishText[currentIndex])) {
-                        characters[currentIndex].classList.add("correct");
+                function isUntypableCharacter(char) {
+                    if (!char) {
+                        return false;
+                    }
+                    const charCode = char.charCodeAt(0);
+                    return charCode > 126 || (charCode < 32 && charCode !== 9 && charCode !== 10);
+                }
+
+                function isSkippedCharacter(index) {
+                    if (index < 0 || index >= englishText.length) {
+                        return false;
+                    }
+                    const char = englishText[index];
+                    return isUntypableCharacter(char) || punctuationToSkip.includes(char);
+                }
+
+                function markCharacterCorrect(index) {
+                    if (!characters[index]) {
+                        return;
+                    }
+                    characters[index].textContent = englishText[index];
+                    characters[index].classList.remove("incorrect");
+                    characters[index].classList.add("correct");
+                }
+
+                function skipAutoCharacters() {
+                    while (currentIndex < characters.length && isSkippedCharacter(currentIndex)) {
+                        markCharacterCorrect(currentIndex);
+                        typedCharacters[currentIndex] = null;
                         currentIndex += 1;
                     }
                 }
 
+                function clearPartialPreview() {
+                    previewedCharacters.forEach((span) => span.classList.remove("partial-preview-active"));
+                    previewedCharacters.clear();
+                }
+
+                function addPartialPreview(index) {
+                    const span = characters[index];
+                    if (!span) {
+                        return;
+                    }
+                    span.classList.add("partial-preview-active");
+                    previewedCharacters.add(span);
+                }
+
                 function updatePartialPreview() {
-                    characters.forEach((span) => span.classList.remove("partial-preview-active"));
+                    clearPartialPreview();
                     if (!state.settings.practiceWordHint) {
                         return;
                     }
-                    if (currentIndex < characters.length) {
-                        characters[currentIndex].classList.add("partial-preview-active");
-                    }
+                    addPartialPreview(currentIndex);
                     let start = currentIndex;
                     while (start < englishText.length && /\s/.test(englishText[start])) {
                         start += 1;
@@ -465,9 +763,7 @@
                         end += 1;
                     }
                     for (let index = start; index < end; index += 1) {
-                        if (characters[index]) {
-                            characters[index].classList.add("partial-preview-active");
-                        }
+                        addPartialPreview(index);
                     }
                 }
 
@@ -513,9 +809,16 @@
                         return;
                     }
 
-                    characters.forEach((span, index) => {
-                        span.classList.toggle("current", index === currentIndex);
-                    });
+                    const nextActiveCharacter = characters[currentIndex] || null;
+                    if (activeCharacter !== nextActiveCharacter) {
+                        if (activeCharacter) {
+                            activeCharacter.classList.remove("current");
+                        }
+                        if (nextActiveCharacter) {
+                            nextActiveCharacter.classList.add("current");
+                        }
+                        activeCharacter = nextActiveCharacter;
+                    }
 
                     const target = getCursorTarget();
                     if (!target) {
@@ -558,12 +861,42 @@
                     persistPracticeProgress();
                 }
 
-                function isSkippable(index) {
-                    if (index < 0 || index >= englishText.length) {
-                        return false;
+                function checkPracticeCompletion() {
+                    if (characters.length > 0 && currentIndex >= characters.length) {
+                        showModeCompletionNotice("practice");
                     }
-                    const charCode = englishText[index].charCodeAt(0);
-                    return punctuationToSkip.includes(englishText[index]) || charCode > 126 || (charCode < 32 && charCode !== 9 && charCode !== 10);
+                }
+
+                function syncPracticePreviewToggles() {
+                    visibilityToggle.checked = state.settings.practiceReveal;
+                    partialPreviewToggle.checked = state.settings.practiceWordHint;
+                    document.body.classList.toggle("hide-upcoming", !state.settings.practiceReveal);
+                }
+
+                function setPracticePreviewSettings(nextSettings, revealWhenHintDisabled = false) {
+                    const revealProvided = Object.prototype.hasOwnProperty.call(nextSettings, "practiceReveal");
+                    const wordHintProvided = Object.prototype.hasOwnProperty.call(nextSettings, "practiceWordHint");
+                    state.settings.practiceReveal = revealProvided
+                        ? Boolean(nextSettings.practiceReveal)
+                        : Boolean(state.settings.practiceReveal);
+                    state.settings.practiceWordHint = wordHintProvided
+                        ? Boolean(nextSettings.practiceWordHint)
+                        : Boolean(state.settings.practiceWordHint);
+
+                    if (wordHintProvided && state.settings.practiceWordHint) {
+                        state.settings.practiceReveal = false;
+                    } else if (revealProvided && state.settings.practiceReveal) {
+                        state.settings.practiceWordHint = false;
+                    } else if (revealWhenHintDisabled) {
+                        state.settings.practiceReveal = true;
+                    } else if (state.settings.practiceReveal) {
+                        state.settings.practiceWordHint = false;
+                    } else if (state.settings.practiceWordHint) {
+                        state.settings.practiceReveal = false;
+                    }
+                    syncPracticePreviewToggles();
+                    saveSettings(state.settings);
+                    refreshPracticeView();
                 }
 
                 function handleScroll() {
@@ -588,29 +921,16 @@
                         }
                         if (key === "o") {
                             event.preventDefault();
-                            state.settings.practiceReveal = !state.settings.practiceReveal;
-                            visibilityToggle.checked = state.settings.practiceReveal;
-                            if (state.settings.practiceReveal) {
-                                state.settings.practiceWordHint = false;
-                                partialPreviewToggle.checked = false;
-                            }
-                            saveSettings(state.settings);
-                            refreshPracticeView();
+                            setPracticePreviewSettings({
+                                practiceReveal: !state.settings.practiceReveal,
+                            });
                             return;
                         }
                         if (key === "h") {
                             event.preventDefault();
-                            state.settings.practiceWordHint = !state.settings.practiceWordHint;
-                            partialPreviewToggle.checked = state.settings.practiceWordHint;
-                            if (state.settings.practiceWordHint) {
-                                state.settings.practiceReveal = false;
-                                visibilityToggle.checked = false;
-                            } else {
-                                state.settings.practiceReveal = true;
-                                visibilityToggle.checked = true;
-                            }
-                            saveSettings(state.settings);
-                            refreshPracticeView();
+                            setPracticePreviewSettings({
+                                practiceWordHint: !state.settings.practiceWordHint,
+                            }, true);
                             return;
                         }
                     }
@@ -640,7 +960,7 @@
                                 span.classList.remove("correct", "incorrect");
                                 span.textContent = englishText[currentIndex];
                                 typedCharacters[currentIndex] = null;
-                            } while (currentIndex > 0 && isSkippable(currentIndex - 1));
+                            } while (currentIndex > 0 && isSkippedCharacter(currentIndex - 1));
                         }
                         refreshPracticeView();
                         return;
@@ -651,9 +971,10 @@
                     }
 
                     event.preventDefault();
-                    skipUntypableCharacters();
+                    skipAutoCharacters();
                     if (currentIndex >= characters.length) {
                         refreshPracticeView();
+                        checkPracticeCompletion();
                         return;
                     }
 
@@ -672,35 +993,24 @@
                         currentIndex += 1;
                     }
 
-                    skipPunctuation();
-                    skipUntypableCharacters();
+                    skipAutoCharacters();
                     if (currentIndex < characters.length) {
                         characters[currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
                     }
                     refreshPracticeView();
+                    checkPracticeCompletion();
                 }
 
                 function handleVisibilityChange() {
-                    state.settings.practiceReveal = visibilityToggle.checked;
-                    if (visibilityToggle.checked) {
-                        state.settings.practiceWordHint = false;
-                        partialPreviewToggle.checked = false;
-                    }
-                    saveSettings(state.settings);
-                    refreshPracticeView();
+                    setPracticePreviewSettings({
+                        practiceReveal: visibilityToggle.checked,
+                    });
                 }
 
                 function handlePartialPreviewChange() {
-                    state.settings.practiceWordHint = partialPreviewToggle.checked;
-                    if (partialPreviewToggle.checked) {
-                        state.settings.practiceReveal = false;
-                        visibilityToggle.checked = false;
-                    } else {
-                        state.settings.practiceReveal = true;
-                        visibilityToggle.checked = true;
-                    }
-                    saveSettings(state.settings);
-                    refreshPracticeView();
+                    setPracticePreviewSettings({
+                        practiceWordHint: partialPreviewToggle.checked,
+                    }, true);
                 }
 
                 function handleDarkModeChange() {
@@ -709,6 +1019,11 @@
                     applyTheme(state.settings);
                 }
 
+                if (state.settings.practiceReveal && state.settings.practiceWordHint) {
+                    state.settings.practiceWordHint = false;
+                    saveSettings(state.settings);
+                }
+                syncPracticePreviewToggles();
                 visibilityToggle.addEventListener("change", handleVisibilityChange);
                 partialPreviewToggle.addEventListener("change", handlePartialPreviewChange);
                 darkModeToggle.addEventListener("change", handleDarkModeChange);
@@ -729,8 +1044,6 @@
                     applyKoreanVisibility(koreanText);
                 }
                 updateKoreanToggle();
-                skipUntypableCharacters();
-                skipPunctuation();
                 if (Array.isArray(practiceProgress.typedCharacters)) {
                     currentIndex = Math.min(
                         Number.isInteger(practiceProgress.currentIndex) ? practiceProgress.currentIndex : 0,
@@ -743,25 +1056,22 @@
                         }
                         const typedValue = typedCharacters[index];
                         const correctChar = englishText[index];
-                        const charCode = correctChar ? correctChar.charCodeAt(0) : 0;
-                        const autoSkipped = punctuationToSkip.includes(correctChar)
-                            || charCode > 126
-                            || (charCode < 32 && charCode !== 9 && charCode !== 10);
 
                         if (typedValue != null) {
-                            if (typedValue.toLowerCase() === correctChar.toLowerCase()) {
+                            const normalizedTypedValue = String(typedValue);
+                            if (normalizedTypedValue.toLowerCase() === correctChar.toLowerCase()) {
                                 span.textContent = correctChar;
                                 span.classList.add("correct");
                             } else {
-                                span.textContent = typedValue;
+                                span.textContent = normalizedTypedValue;
                                 span.classList.add("incorrect");
                             }
-                        } else if (autoSkipped) {
-                            span.textContent = correctChar;
-                            span.classList.add("correct");
+                        } else if (isSkippedCharacter(index)) {
+                            markCharacterCorrect(index);
                         }
                     }
                 }
+                skipAutoCharacters();
                 updateStatus();
                 updateKoreanHighlight();
                 updateCursor(false);
@@ -990,6 +1300,18 @@
                     input.classList.toggle("incorrect", Boolean(value) && value !== answer);
                     updateStatus();
                     persistFillProgress();
+                    checkFillCompletion();
+                }
+
+                function checkFillCompletion() {
+                    const complete = blanks.length > 0 && blanks.every((blank) => {
+                        const answer = (blank.dataset.correct || "").toLowerCase();
+                        const value = (blank.value || "").toLowerCase();
+                        return value === answer;
+                    });
+                    if (complete) {
+                        showModeCompletionNotice("fill");
+                    }
                 }
 
                 function handleFocus(event) {
@@ -1316,10 +1638,17 @@
                     updateCardStates();
                     updateCamera(animate);
                     persistLineProgress();
+                    checkLineCompletion();
                 }
 
                 function persistLineProgress() {
                     saveTextProgress("line", { activeIndex });
+                }
+
+                function checkLineCompletion() {
+                    if (maxLineCount > 0 && activeIndex >= maxLineCount - 1) {
+                        showModeCompletionNotice("line");
+                    }
                 }
 
                 function handleKeydown(event) {
@@ -1492,6 +1821,12 @@
             return () => {
                 persistCurrentMode();
                 cleanup();
+                if (completionNoticeTimer !== null) {
+                    window.clearTimeout(completionNoticeTimer);
+                }
+                if (completionConfetti) {
+                    completionConfetti.destroy();
+                }
                 if (fullscreenToggle) {
                     fullscreenToggle.removeEventListener("click", handleFullscreenToggle);
                 }
