@@ -1552,6 +1552,7 @@
                 let touchStartY = null;
                 let touchStartX = null;
                 let touchTracking = false;
+                let wheelLockedUntil = 0;
 
                 cursor.style.opacity = "0";
                 koreanWidget.innerHTML = "";
@@ -1795,6 +1796,41 @@
                     }
                 }
 
+                function normalizeWheelDelta(event) {
+                    if (event.deltaMode === 1) {
+                        return event.deltaY * 16;
+                    }
+                    if (event.deltaMode === 2) {
+                        return event.deltaY * Math.max(1, camera.clientHeight);
+                    }
+                    return event.deltaY;
+                }
+
+                function handleWheel(event) {
+                    if (maxLineCount <= 1) {
+                        return;
+                    }
+
+                    const verticalDelta = normalizeWheelDelta(event);
+                    const horizontalDelta = Math.abs(event.deltaX || 0);
+                    if (Math.abs(verticalDelta) <= horizontalDelta) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    const now = performance.now();
+                    if (now < wheelLockedUntil || Math.abs(verticalDelta) < 4) {
+                        return;
+                    }
+
+                    const direction = verticalDelta > 0 ? 1 : -1;
+                    const nextIndex = Math.min(Math.max(activeIndex + direction, 0), maxLineCount - 1);
+                    wheelLockedUntil = now + 600;
+                    if (nextIndex !== activeIndex) {
+                        setActiveLine(nextIndex);
+                    }
+                }
+
                 renderScene();
                 if (Number.isInteger(lineProgress.activeIndex)) {
                     activeIndex = Math.min(Math.max(lineProgress.activeIndex, 0), Math.max(0, maxLineCount - 1));
@@ -1803,6 +1839,7 @@
                 syncScenePadding();
                 updateCamera(false);
                 darkModeToggle.addEventListener("change", handleDarkModeChange);
+                camera.addEventListener("wheel", handleWheel, { passive: false });
                 camera.addEventListener("touchstart", handleTouchStart, { passive: true });
                 camera.addEventListener("touchmove", handleTouchMove, { passive: false });
                 camera.addEventListener("touchend", handleTouchEnd, { passive: true });
@@ -1826,6 +1863,7 @@
                         resizeObserver.disconnect();
                     }
                     darkModeToggle.removeEventListener("change", handleDarkModeChange);
+                    camera.removeEventListener("wheel", handleWheel);
                     camera.removeEventListener("touchstart", handleTouchStart);
                     camera.removeEventListener("touchmove", handleTouchMove);
                     camera.removeEventListener("touchend", handleTouchEnd);
