@@ -197,6 +197,7 @@
             let persistCurrentMode = () => {};
             let completionNoticeTimer = null;
             let completionConfetti = null;
+            let completionNoticeKeyHandler = null;
             const completionMessages = {
                 practice: "글쓰기 완료!",
                 fill: "단어 채우기 완료!",
@@ -242,6 +243,24 @@
                 };
                 saveStudyProgress(state.progress);
                 return true;
+            }
+
+            function hideCompletionPopup() {
+                const notice = document.getElementById("completionNotice");
+                if (notice) {
+                    notice.classList.remove("visible");
+                }
+                if (completionNoticeTimer !== null) {
+                    window.clearTimeout(completionNoticeTimer);
+                    completionNoticeTimer = null;
+                }
+                if (completionNoticeKeyHandler) {
+                    document.removeEventListener("keydown", completionNoticeKeyHandler, true);
+                    completionNoticeKeyHandler = null;
+                }
+                if (completionConfetti) {
+                    completionConfetti.destroy();
+                }
             }
 
             function getCompletionConfetti() {
@@ -460,21 +479,41 @@
                 text.className = "completion-notice-text";
                 text.textContent = message;
 
-                notice.append(image, text);
+                const closeButton = document.createElement("button");
+                closeButton.type = "button";
+                closeButton.className = "completion-notice-close";
+                closeButton.textContent = "끄기(Enter)";
+                closeButton.addEventListener("click", hideCompletionPopup, { once: true });
+
+                notice.append(image, text, closeButton);
                 if (completionNoticeTimer !== null) {
                     window.clearTimeout(completionNoticeTimer);
                     completionNoticeTimer = null;
                 }
+                if (completionNoticeKeyHandler) {
+                    document.removeEventListener("keydown", completionNoticeKeyHandler, true);
+                }
+                completionNoticeKeyHandler = (event) => {
+                    if (!notice.classList.contains("visible")) {
+                        return;
+                    }
+                    if (event.key !== "Enter") {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    hideCompletionPopup();
+                };
 
                 notice.classList.remove("visible");
                 void notice.offsetHeight;
                 notice.classList.add("visible");
+                document.addEventListener("keydown", completionNoticeKeyHandler, true);
                 requestAnimationFrame(() => {
                     getCompletionConfetti().burst(notice, 280);
                 });
                 completionNoticeTimer = window.setTimeout(() => {
-                    notice.classList.remove("visible");
-                    completionNoticeTimer = null;
+                    hideCompletionPopup();
                 }, 4000);
             }
 
@@ -1823,6 +1862,9 @@
                 cleanup();
                 if (completionNoticeTimer !== null) {
                     window.clearTimeout(completionNoticeTimer);
+                }
+                if (completionNoticeKeyHandler) {
+                    document.removeEventListener("keydown", completionNoticeKeyHandler, true);
                 }
                 if (completionConfetti) {
                     completionConfetti.destroy();

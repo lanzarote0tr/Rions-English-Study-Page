@@ -763,7 +763,7 @@ body.korean-visible .korean-widget {
 }
 
 .completion-notice-image {
-    width: min(68vw, 240px);
+    width: min(76vw, 320px);
     aspect-ratio: 16 / 9;
     border-radius: 8px;
     object-fit: cover;
@@ -771,6 +771,25 @@ body.korean-visible .korean-widget {
 
 .completion-notice-text {
     display: block;
+    color: var(--link-color);
+}
+
+.completion-notice-close {
+    min-height: 36px;
+    padding: 0 18px;
+    border-radius: 8px;
+    background: var(--link-color);
+    color: #fff;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.completion-notice-close:hover {
+    background: var(--link-hover-color);
+    transform: translateY(-1px);
 }
 
 .completion-confetti-canvas {
