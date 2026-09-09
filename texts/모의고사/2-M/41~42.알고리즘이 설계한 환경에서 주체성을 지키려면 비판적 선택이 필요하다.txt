@@ -1,0 +1,16 @@
+The concept of “**choice architecture**,” popularized in behavioral economics, highlights how the design of the environment in which choices are made can **significantly influence** the decisions people make.
+행동경제학에서 대중화된 ‘선택 구조’라는 개념은 선택이 이루어지는 환경의 설계가 사람들의 결정에 얼마나 큰 영향을 줄 수 있는지를 강조한다.
+Algorithms are, in essence, **sophisticated architects** of our digital environments.
+알고리즘은 본질적으로 우리 디지털 환경의 정교한 설계자이다.
+By **curating** what we see, what we are recommended, and what options are presented to us, they subtly, and sometimes not so subtly, **nudge** us towards **particular paths**.
+알고리즘은 우리가 보는 것, 추천받는 것, 제시받는 선택지를 선별하여 미묘하게, 때로는 그리 미묘하지 않게 우리를 특정한 경로로 유도한다.
+While nudges can be used for **beneficial purposes**, such as encouraging healthier habits, they also carry the **potential for manipulation**, particularly when the underlying objectives of the architects are not **aligned with** the well-being or **autonomy** of the individual.
+넛지는 더 건강한 습관을 권장하는 등 유익한 목적으로 사용될 수 있지만, 특히 설계자의 근본적인 목표가 개인의 안녕이나 자율성과 일치하지 않을 때 조작의 가능성도 지닌다.
+The question then becomes: how can we cultivate and protect our **human agency** in an increasingly algorithmic world?
+그러면 질문은 이렇게 된다. 점점 더 알고리즘의 영향을 받는 세상에서 어떻게 인간의 주체성을 기르고 보호할 수 있을까?
+It requires a **conscious effort** to maintain **critical engagement** with the technologies we use.
+그러려면 우리가 사용하는 기술을 비판적으로 대하려는 의식적인 노력이 필요하다.
+It means actively seeking out **diverse perspectives**, **challenging algorithmic recommendations**, and making deliberate choices that **go against the predicted grain**.
+이는 다양한 관점을 적극적으로 찾고, 알고리즘의 추천에 의문을 제기하며, 예측된 흐름을 거스르는 의도적인 선택을 하는 것을 뜻한다.
+It involves cultivating a **healthy skepticism** towards the seemingly objective outputs of algorithms and remembering that these systems are designed by humans with specific goals, and that their data is a **reflection of past realities**, not necessarily a prescription for future flourishing.
+이는 겉보기에 객관적인 알고리즘의 결과에 건전한 회의적 태도를 기르고, 이 시스템들은 특정 목표를 가진 인간이 설계했으며 그 데이터는 과거 현실의 반영이지 반드시 미래의 번영을 위한 처방은 아니라는 점을 기억하는 것을 포함한다.
