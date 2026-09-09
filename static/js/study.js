@@ -197,7 +197,7 @@
             let persistCurrentMode = () => {};
             let completionNoticeTimer = null;
             let completionConfetti = null;
-            let completionNoticeKeyHandler = null;
+            const completionDismissEvents = ["keydown", "click", "pointermove"];
             const completionMessages = {
                 practice: "글쓰기 완료!",
                 fill: "단어 채우기 완료!",
@@ -249,18 +249,32 @@
                 const notice = document.getElementById("completionNotice");
                 if (notice) {
                     notice.classList.remove("visible");
+                    notice.inert = true;
+                    notice.setAttribute("aria-hidden", "true");
                 }
                 if (completionNoticeTimer !== null) {
                     window.clearTimeout(completionNoticeTimer);
                     completionNoticeTimer = null;
                 }
-                if (completionNoticeKeyHandler) {
-                    document.removeEventListener("keydown", completionNoticeKeyHandler, true);
-                    completionNoticeKeyHandler = null;
-                }
+                completionDismissEvents.forEach((type) => {
+                    document.removeEventListener(type, handleCompletionDismiss, true);
+                });
                 if (completionConfetti) {
                     completionConfetti.destroy();
                 }
+            }
+
+            function handleCompletionDismiss(event) {
+                const notice = document.getElementById("completionNotice");
+                if (!notice || !notice.classList.contains("visible")) {
+                    return;
+                }
+                if (event.type !== "pointermove") {
+                    // Dismissing the notice must not also type or activate a control behind it.
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+                hideCompletionPopup();
             }
 
             function getCompletionConfetti() {
@@ -457,6 +471,7 @@
                 if (!pageRoot) {
                     return;
                 }
+                hideCompletionPopup();
 
                 let notice = document.getElementById("completionNotice");
                 if (!notice) {
@@ -482,35 +497,22 @@
                 const closeButton = document.createElement("button");
                 closeButton.type = "button";
                 closeButton.className = "completion-notice-close";
-                closeButton.textContent = "끄기(Enter)";
+                closeButton.textContent = "닫기";
                 closeButton.addEventListener("click", hideCompletionPopup, { once: true });
 
                 notice.append(image, text, closeButton);
-                if (completionNoticeTimer !== null) {
-                    window.clearTimeout(completionNoticeTimer);
-                    completionNoticeTimer = null;
-                }
-                if (completionNoticeKeyHandler) {
-                    document.removeEventListener("keydown", completionNoticeKeyHandler, true);
-                }
-                completionNoticeKeyHandler = (event) => {
-                    if (!notice.classList.contains("visible")) {
-                        return;
-                    }
-                    if (event.key !== "Enter") {
-                        return;
-                    }
-                    event.preventDefault();
-                    event.stopPropagation();
-                    hideCompletionPopup();
-                };
-
+                notice.inert = false;
+                notice.removeAttribute("aria-hidden");
                 notice.classList.remove("visible");
                 void notice.offsetHeight;
                 notice.classList.add("visible");
-                document.addEventListener("keydown", completionNoticeKeyHandler, true);
+                completionDismissEvents.forEach((type) => {
+                    document.addEventListener(type, handleCompletionDismiss, true);
+                });
                 requestAnimationFrame(() => {
-                    getCompletionConfetti().burst(notice, 280);
+                    if (notice.isConnected && notice.classList.contains("visible") && !core.motion.reduced()) {
+                        getCompletionConfetti().burst(notice, 280);
+                    }
                 });
                 completionNoticeTimer = window.setTimeout(() => {
                     hideCompletionPopup();
@@ -548,6 +550,18 @@
             }
 
             const studyModeButtons = [...document.querySelectorAll(".study-mode-button")];
+            const modeTabs = document.querySelector(".study-mode-tabs");
+            const syncModeIndicator = () => {
+                if (modeTabs && !modeTabs.classList.contains("mode-indicator-reset")) {
+                    core.motion.positionModeIndicator(modeTabs.querySelector(".active"));
+                }
+            };
+            const modeIndicatorObserver = modeTabs && "ResizeObserver" in window
+                ? new ResizeObserver(syncModeIndicator) : null;
+            if (modeIndicatorObserver) {
+                modeIndicatorObserver.observe(modeTabs);
+                studyModeButtons.forEach((button) => modeIndicatorObserver.observe(button));
+            }
 
             function navigateStudyMode(offset) {
                 const modes = ["practice", "fill", "line"];
@@ -566,6 +580,12 @@
             }
 
             function handleCommonStudyShortcut(event) {
+                if (shortcutsDialog.open || studyMore.open
+                    || (event.target instanceof Element
+                        && event.target.closest("button, a, summary, input[type='checkbox']")
+                        && ["Enter", " ", "Tab"].includes(event.key))) {
+                    return true;
+                }
                 if (!event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) {
                     return false;
                 }
@@ -587,6 +607,60 @@
                 }
                 return false;
             }
+
+            const studyMore = document.getElementById("studyMore");
+            const studyMoreToggle = document.getElementById("studyMoreToggle");
+            const studyShortcutsButton = document.getElementById("studyShortcutsButton");
+            const shortcutsDialog = document.getElementById("shortcutsDialog");
+            const shortcutsClose = document.getElementById("shortcutsClose");
+
+            function openShortcuts() {
+                studyMore.open = false;
+                shortcutsDialog.showModal();
+            }
+
+            function closeShortcuts() {
+                shortcutsDialog.close();
+            }
+
+            function restoreMenuFocus() {
+                if (studyMoreToggle.isConnected) {
+                    studyMoreToggle.focus({ preventScroll: true });
+                }
+            }
+
+            function handleMenuOutsideClick(event) {
+                if (!studyMore.contains(event.target)) {
+                    studyMore.open = false;
+                }
+            }
+
+            function handleMenuKeydown(event) {
+                if (event.key === "Escape" && studyMore.open) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    studyMore.open = false;
+                    restoreMenuFocus();
+                }
+            }
+
+            function handleShortcutsBackdrop(event) {
+                if (event.target !== shortcutsDialog) {
+                    return;
+                }
+                const rect = shortcutsDialog.getBoundingClientRect();
+                if (event.clientX < rect.left || event.clientX > rect.right
+                    || event.clientY < rect.top || event.clientY > rect.bottom) {
+                    closeShortcuts();
+                }
+            }
+
+            studyShortcutsButton.addEventListener("click", openShortcuts);
+            shortcutsClose.addEventListener("click", closeShortcuts);
+            shortcutsDialog.addEventListener("click", handleShortcutsBackdrop);
+            shortcutsDialog.addEventListener("close", restoreMenuFocus);
+            document.addEventListener("click", handleMenuOutsideClick);
+            document.addEventListener("keydown", handleMenuKeydown, true);
 
             const fullscreenToggle = document.getElementById("fullscreenToggle");
             let studyFullscreenActive = false;
@@ -629,14 +703,14 @@
                 const cursor = document.getElementById("cursor");
 
                 switchContainer.innerHTML = `
-                    ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글 (Shift+K)</label></div>' : ''}
+                    ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글</label></div>' : ''}
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-visibility"><span class="slider"></span></label>
-                        <label for="toggle-visibility" class="switch-label">미리보기 (Shift+O)</label>
+                        <label for="toggle-visibility" class="switch-label">미리보기</label>
                     </div>
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-partial-preview"><span class="slider"></span></label>
-                        <label for="toggle-partial-preview" class="switch-label">일부 미리보기 (Shift+H)</label>
+                        <label for="toggle-partial-preview" class="switch-label">일부 미리보기</label>
                     </div>
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
@@ -1152,14 +1226,14 @@
                 cursor.style.opacity = "0";
 
                 switchContainer.innerHTML = `
-                    ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글 (Shift+K)</label></div>' : ''}
+                    ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글</label></div>' : ''}
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-preview"><span class="slider"></span></label>
-                        <label for="toggle-preview" class="switch-label">미리보기 (Shift+H)</label>
+                        <label for="toggle-preview" class="switch-label">미리보기</label>
                     </div>
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-first-letter"><span class="slider"></span></label>
-                        <label for="toggle-first-letter" class="switch-label">앞글자만 보기 (Shift+I)</label>
+                        <label for="toggle-first-letter" class="switch-label">앞글자만 보기</label>
                     </div>
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
@@ -1552,7 +1626,11 @@
                 let touchStartY = null;
                 let touchStartX = null;
                 let touchTracking = false;
-                let wheelLockedUntil = 0;
+                let wheelLastEventAt = -Infinity;
+                let wheelAccumulatedDelta = 0;
+                let wheelGestureMoved = false;
+                const wheelGestureGap = 50;
+                const wheelThreshold = 10;
 
                 cursor.style.opacity = "0";
                 koreanWidget.innerHTML = "";
@@ -1769,6 +1847,12 @@
                     }
                 }
 
+                function handleTouchCancel() {
+                    touchTracking = false;
+                    touchStartY = null;
+                    touchStartX = null;
+                }
+
                 function handleTouchEnd(event) {
                     if (!touchTracking) {
                         return;
@@ -1796,36 +1880,51 @@
                     }
                 }
 
-                function normalizeWheelDelta(event) {
-                    if (event.deltaMode === 1) {
-                        return event.deltaY * 16;
-                    }
-                    if (event.deltaMode === 2) {
-                        return event.deltaY * Math.max(1, camera.clientHeight);
-                    }
-                    return event.deltaY;
-                }
-
                 function handleWheel(event) {
-                    if (maxLineCount <= 1) {
+                    // Trackpad pinch gestures should retain the browser's zoom behavior.
+                    if (maxLineCount <= 1 || event.ctrlKey || event.metaKey
+                        || shortcutsDialog.open || studyMore.open) {
                         return;
                     }
 
-                    const verticalDelta = normalizeWheelDelta(event);
-                    const horizontalDelta = Math.abs(event.deltaX || 0);
-                    if (Math.abs(verticalDelta) <= horizontalDelta) {
+                    const unit = event.deltaMode === 1 ? 16
+                        : event.deltaMode === 2 ? Math.max(1, textDisplay.clientHeight) : 1;
+                    const verticalDelta = event.deltaY * unit;
+                    const horizontalDelta = event.deltaX * unit;
+                    if (!verticalDelta && !horizontalDelta) {
                         return;
                     }
 
-                    event.preventDefault();
                     const now = performance.now();
-                    if (now < wheelLockedUntil || Math.abs(verticalDelta) < 4) {
+                    if (now - wheelLastEventAt >= wheelGestureGap) {
+                        wheelAccumulatedDelta = 0;
+                        wheelGestureMoved = false;
+                    }
+                    // Even sub-pixel / sideways momentum keeps the same gesture alive.
+                    // Release only after the event stream stops, not after an animation timer.
+                    wheelLastEventAt = now;
+                    if (Math.abs(verticalDelta) <= Math.abs(horizontalDelta)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    if (wheelGestureMoved) {
                         return;
                     }
 
-                    const direction = verticalDelta > 0 ? 1 : -1;
+                    if (Math.sign(verticalDelta) !== Math.sign(wheelAccumulatedDelta)) {
+                        wheelAccumulatedDelta = 0;
+                    }
+                    wheelAccumulatedDelta += verticalDelta;
+                    if (Math.abs(wheelAccumulatedDelta) < wheelThreshold) {
+                        return;
+                    }
+
+                    const direction = wheelAccumulatedDelta > 0 ? 1 : -1;
                     const nextIndex = Math.min(Math.max(activeIndex + direction, 0), maxLineCount - 1);
-                    wheelLockedUntil = now + 600;
+                    wheelGestureMoved = true;
+                    // A new gesture dismisses the notice and navigates in the same event.
+                    // Momentum from the gesture that completed the text leaves it visible.
+                    hideCompletionPopup();
                     if (nextIndex !== activeIndex) {
                         setActiveLine(nextIndex);
                     }
@@ -1839,11 +1938,13 @@
                 syncScenePadding();
                 updateCamera(false);
                 darkModeToggle.addEventListener("change", handleDarkModeChange);
-                camera.addEventListener("wheel", handleWheel, { passive: false });
-                camera.addEventListener("touchstart", handleTouchStart, { passive: true });
-                camera.addEventListener("touchmove", handleTouchMove, { passive: false });
-                camera.addEventListener("touchend", handleTouchEnd, { passive: true });
-                camera.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+                // PJAX leaves the pointer over the clicked tab/link until it moves.
+                // Handle wheel input across the line-reading page, including the notice.
+                document.addEventListener("wheel", handleWheel, { passive: false });
+                textDisplay.addEventListener("touchstart", handleTouchStart, { passive: true });
+                textDisplay.addEventListener("touchmove", handleTouchMove, { passive: false });
+                textDisplay.addEventListener("touchend", handleTouchEnd, { passive: true });
+                textDisplay.addEventListener("touchcancel", handleTouchCancel, { passive: true });
 
                 if ("ResizeObserver" in window) {
                     resizeObserver = new ResizeObserver(() => {
@@ -1863,11 +1964,11 @@
                         resizeObserver.disconnect();
                     }
                     darkModeToggle.removeEventListener("change", handleDarkModeChange);
-                    camera.removeEventListener("wheel", handleWheel);
-                    camera.removeEventListener("touchstart", handleTouchStart);
-                    camera.removeEventListener("touchmove", handleTouchMove);
-                    camera.removeEventListener("touchend", handleTouchEnd);
-                    camera.removeEventListener("touchcancel", handleTouchEnd);
+                    document.removeEventListener("wheel", handleWheel);
+                    textDisplay.removeEventListener("touchstart", handleTouchStart);
+                    textDisplay.removeEventListener("touchmove", handleTouchMove);
+                    textDisplay.removeEventListener("touchend", handleTouchEnd);
+                    textDisplay.removeEventListener("touchcancel", handleTouchCancel);
                     document.removeEventListener("keydown", handleKeydown);
                 };
                 persistCurrentMode = persistLineProgress;
@@ -1888,6 +1989,7 @@
             }
 
             initializeStudyPage();
+            syncModeIndicator();
 
             function handlePageHide() {
                 persistCurrentMode();
@@ -1898,15 +2000,17 @@
             return () => {
                 persistCurrentMode();
                 cleanup();
-                if (completionNoticeTimer !== null) {
-                    window.clearTimeout(completionNoticeTimer);
+                if (modeIndicatorObserver) {
+                    modeIndicatorObserver.disconnect();
                 }
-                if (completionNoticeKeyHandler) {
-                    document.removeEventListener("keydown", completionNoticeKeyHandler, true);
-                }
-                if (completionConfetti) {
-                    completionConfetti.destroy();
-                }
+                hideCompletionPopup();
+                studyShortcutsButton.removeEventListener("click", openShortcuts);
+                shortcutsClose.removeEventListener("click", closeShortcuts);
+                shortcutsDialog.removeEventListener("click", handleShortcutsBackdrop);
+                shortcutsDialog.removeEventListener("close", restoreMenuFocus);
+                document.removeEventListener("click", handleMenuOutsideClick);
+                document.removeEventListener("keydown", handleMenuKeydown, true);
+                shortcutsDialog.close();
                 if (fullscreenToggle) {
                     fullscreenToggle.removeEventListener("click", handleFullscreenToggle);
                 }

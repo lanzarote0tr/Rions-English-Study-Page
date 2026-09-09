@@ -83,13 +83,16 @@
             const createFolderForm = document.getElementById("createFolderForm");
             const createTextForm = document.getElementById("createTextForm");
             const createStatus = document.getElementById("createStatus");
-            const uploadPanel = document.getElementById("uploadPanel");
-            const uploadToggle = uploadPanel ? uploadPanel.querySelector(".upload-toggle") : null;
+            const uploadDialog = document.getElementById("uploadDialog");
+            const uploadToggle = document.getElementById("openUpload");
+            const closeUpload = document.getElementById("closeUpload");
             const openFormatGuide = document.getElementById("openFormatGuide");
             const closeFormatGuide = document.getElementById("closeFormatGuide");
             const formatGuideModal = document.getElementById("formatGuideModal");
+            const copyFormatPrompt = document.getElementById("copyFormatPrompt");
+            const aiFormatPrompt = document.getElementById("aiFormatPrompt");
+            const formatCopyStatus = document.getElementById("formatCopyStatus");
             const currentPath = normalizePath(pageRoot ? pageRoot.dataset.currentPath || "" : "");
-            let uploadCloseTimer = 0;
 
             applyTheme(settings);
             renderLocalItems(currentPath);
@@ -120,6 +123,8 @@
             }
 
             function refreshCurrentFolder() {
+                hideFormatGuide();
+                closeUploadPanel();
                 const selectUrl = `/select/${encodePath(currentPath)}`;
                 if (window.EnglishStudyNavigation && typeof window.EnglishStudyNavigation.visit === "function") {
                     window.EnglishStudyNavigation.visit(selectUrl, { history: "none" });
@@ -129,45 +134,14 @@
             }
 
             function openUploadPanel() {
-                if (!uploadPanel) {
-                    return;
+                if (uploadDialog && !uploadDialog.open) {
+                    uploadDialog.showModal();
                 }
-                window.clearTimeout(uploadCloseTimer);
-                uploadPanel.open = true;
-                if (uploadToggle) {
-                    uploadToggle.setAttribute("aria-expanded", "true");
-                }
-                uploadPanel.classList.remove("is-closing");
-                requestAnimationFrame(() => {
-                    uploadPanel.classList.add("is-open");
-                });
             }
 
             function closeUploadPanel() {
-                if (!uploadPanel) {
-                    return;
-                }
-                window.clearTimeout(uploadCloseTimer);
-                uploadPanel.classList.remove("is-open");
-                uploadPanel.classList.add("is-closing");
-                uploadCloseTimer = window.setTimeout(() => {
-                    uploadPanel.open = false;
-                    uploadPanel.classList.remove("is-closing");
-                    if (uploadToggle) {
-                        uploadToggle.setAttribute("aria-expanded", "false");
-                    }
-                }, 260);
-            }
-
-            function handleUploadToggle(event) {
-                if (!uploadPanel) {
-                    return;
-                }
-                event.preventDefault();
-                if (uploadPanel.open && uploadPanel.classList.contains("is-open")) {
-                    closeUploadPanel();
-                } else {
-                    openUploadPanel();
+                if (uploadDialog) {
+                    uploadDialog.close();
                 }
             }
 
@@ -258,33 +232,46 @@
             }
 
             function showFormatGuide() {
-                if (!formatGuideModal) {
+                if (formatGuideModal && !formatGuideModal.open) {
+                    if (formatCopyStatus) {
+                        formatCopyStatus.textContent = "";
+                    }
+                    formatGuideModal.showModal();
+                }
+            }
+
+            async function handleCopyFormatPrompt() {
+                if (!aiFormatPrompt || !formatCopyStatus) {
                     return;
                 }
-                formatGuideModal.classList.add("show");
-                formatGuideModal.setAttribute("aria-hidden", "false");
-                if (closeFormatGuide) {
-                    closeFormatGuide.focus();
+                try {
+                    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                        throw new Error("Clipboard unavailable");
+                    }
+                    await navigator.clipboard.writeText(aiFormatPrompt.value);
+                    formatCopyStatus.textContent = "복사했습니다.";
+                } catch (error) {
+                    aiFormatPrompt.focus();
+                    aiFormatPrompt.select();
+                    formatCopyStatus.textContent = "전체 선택했어요. 기기의 복사 기능으로 복사해 주세요.";
                 }
             }
 
             function hideFormatGuide() {
-                if (!formatGuideModal) {
+                if (formatGuideModal) {
+                    formatGuideModal.close();
+                }
+            }
+
+            function handleDialogBackdropClick(event) {
+                const dialog = event.currentTarget;
+                if (event.target !== dialog) {
                     return;
                 }
-                formatGuideModal.classList.remove("show");
-                formatGuideModal.setAttribute("aria-hidden", "true");
-            }
-
-            function handleGuideBackdropClick(event) {
-                if (event.target === formatGuideModal) {
-                    hideFormatGuide();
-                }
-            }
-
-            function handleGuideKeydown(event) {
-                if (event.key === "Escape" && formatGuideModal && formatGuideModal.classList.contains("show")) {
-                    hideFormatGuide();
+                const rect = dialog.getBoundingClientRect();
+                if (event.clientX < rect.left || event.clientX > rect.right
+                    || event.clientY < rect.top || event.clientY > rect.bottom) {
+                    dialog.close();
                 }
             }
 
@@ -302,7 +289,13 @@
                 createTextForm.addEventListener("submit", handleCreateText);
             }
             if (uploadToggle) {
-                uploadToggle.addEventListener("click", handleUploadToggle);
+                uploadToggle.addEventListener("click", openUploadPanel);
+            }
+            if (closeUpload) {
+                closeUpload.addEventListener("click", closeUploadPanel);
+            }
+            if (uploadDialog) {
+                uploadDialog.addEventListener("click", handleDialogBackdropClick);
             }
             if (openFormatGuide) {
                 openFormatGuide.addEventListener("click", showFormatGuide);
@@ -311,9 +304,11 @@
                 closeFormatGuide.addEventListener("click", hideFormatGuide);
             }
             if (formatGuideModal) {
-                formatGuideModal.addEventListener("click", handleGuideBackdropClick);
+                formatGuideModal.addEventListener("click", handleDialogBackdropClick);
             }
-            document.addEventListener("keydown", handleGuideKeydown);
+            if (copyFormatPrompt) {
+                copyFormatPrompt.addEventListener("click", handleCopyFormatPrompt);
+            }
             document.addEventListener("click", handleDeleteLocalItem);
 
             return () => {
@@ -331,9 +326,14 @@
                     createTextForm.removeEventListener("submit", handleCreateText);
                 }
                 if (uploadToggle) {
-                    uploadToggle.removeEventListener("click", handleUploadToggle);
+                    uploadToggle.removeEventListener("click", openUploadPanel);
                 }
-                window.clearTimeout(uploadCloseTimer);
+                if (closeUpload) {
+                    closeUpload.removeEventListener("click", closeUploadPanel);
+                }
+                if (uploadDialog) {
+                    uploadDialog.removeEventListener("click", handleDialogBackdropClick);
+                }
                 if (openFormatGuide) {
                     openFormatGuide.removeEventListener("click", showFormatGuide);
                 }
@@ -341,9 +341,13 @@
                     closeFormatGuide.removeEventListener("click", hideFormatGuide);
                 }
                 if (formatGuideModal) {
-                    formatGuideModal.removeEventListener("click", handleGuideBackdropClick);
+                    formatGuideModal.removeEventListener("click", handleDialogBackdropClick);
                 }
-                document.removeEventListener("keydown", handleGuideKeydown);
+                if (copyFormatPrompt) {
+                    copyFormatPrompt.removeEventListener("click", handleCopyFormatPrompt);
+                }
+                hideFormatGuide();
+                closeUploadPanel();
                 document.removeEventListener("click", handleDeleteLocalItem);
             };
         },

@@ -2,6 +2,8 @@
     const pages = window.EnglishStudyPages = window.EnglishStudyPages || {};
     let currentCleanup = () => {};
     let currentRequestToken = 0;
+    let pendingTransition = Promise.resolve();
+    const motion = window.EnglishStudy.motion;
     const pageContextKeys = {
         currentPage: "englishStudyCurrentPage",
         currentStudyTextPath: "englishStudyCurrentStudyTextPath",
@@ -60,7 +62,7 @@
 
     function wait(ms) {
         return new Promise((resolve) => {
-            window.setTimeout(resolve, ms);
+            window.setTimeout(resolve, motion.reduced() ? 0 : ms);
         });
     }
 
@@ -113,7 +115,7 @@
         } else {
             document.body.classList.remove("korean-visible");
         }
-        await wait(300);
+        await wait(motion.duration("--page-transition-fast"));
     }
 
     function updateBodyFromDocument(nextDocument) {
@@ -161,6 +163,10 @@
             await waitForImage(nextImage);
         }
 
+        if (currentImage && nextImage && currentImage.src === nextImage.src) {
+            return "none";
+        }
+
         if (currentHeader && currentImage && nextImage) {
             const currentLayer = currentImage.cloneNode(false);
             const nextLayer = nextImage.cloneNode(false);
@@ -170,13 +176,13 @@
             currentHeader.classList.add("select-image-transition");
             currentHeader.offsetHeight;
             currentHeader.classList.add("is-crossfading");
-            await wait(460);
+            await wait(motion.duration("--page-transition-normal"));
             return "crossfade";
         }
 
         if (currentHeader && !nextImage) {
             currentHeader.classList.add("select-image-fading-out");
-            await wait(340);
+            await wait(motion.duration("--page-transition-normal"));
             return "fade-out";
         }
 
@@ -204,12 +210,22 @@
 
         const stage = document.createElement("div");
         stage.className = "select-content-crossfade";
+        stage.inert = true;
+        stage.setAttribute("aria-hidden", "true");
         stage.append(currentLayer, nextLayer);
         currentContent.append(stage);
+        const currentList = currentContent.querySelector(".file-list");
+        const clonedList = currentLayer.querySelector(".file-list");
+        if (currentList && clonedList) {
+            clonedList.scrollTop = currentList.scrollTop;
+        }
+        nextLayer.querySelectorAll(".file-list li").forEach((item, index) => {
+            item.style.setProperty("--item-delay", `${Math.min(index * 24, 96)}ms`);
+        });
         currentContent.classList.add("select-content-transitioning");
         currentContent.offsetHeight;
         stage.classList.add("is-crossfading");
-        await wait(460);
+        await wait(motion.duration("--page-transition-normal"));
     }
 
     function animateSelectCardsIn(container) {
@@ -301,9 +317,8 @@
         document.body.classList.add("study-launching");
         currentContainer.classList.add("is-study-opening");
         sourceItem.classList.add("is-study-source-card");
-        await wait(380);
         currentContainer.classList.add("is-study-committing");
-        await wait(220);
+        await wait(motion.duration("--page-transition-fast"));
 
         nextRoot.classList.add("study-enter");
         currentCleanup();
@@ -314,6 +329,7 @@
         window.requestAnimationFrame(() => {
             insertedRoot.classList.remove("study-enter");
         });
+        await wait(motion.duration("--page-transition-normal"));
         return true;
     }
 
@@ -346,9 +362,19 @@
 
         const direction = getStudyModeDirection(currentMode, nextMode);
         document.title = nextDocument.title;
+        motion.positionModeIndicator(sourceLink);
         await closeKoreanPanelBeforeStudyTransition();
         currentRoot.classList.add(`mode-exit-${direction}`);
-        await wait(220);
+        await wait(motion.duration("--motion-exit"));
+
+        const oldTabs = currentRoot.querySelector(".study-mode-tabs");
+        const indicator = oldTabs && oldTabs.classList.contains("has-mode-indicator")
+            ? getComputedStyle(oldTabs, "::before") : null;
+        const indicatorState = indicator ? {
+            transform: indicator.transform,
+            width: indicator.width,
+            height: indicator.height,
+        } : null;
 
         nextRoot.classList.add(`mode-enter-${direction}`);
         currentCleanup();
@@ -356,15 +382,27 @@
         const insertedRoot = updateBodyFromDocument(nextDocument);
         updatePageContext(nextDocument.body.dataset.page || "", finalUrl);
         initCurrentPage();
+        const nextTabs = insertedRoot.querySelector(".study-mode-tabs");
+        if (nextTabs && indicatorState) {
+            const matrix = new DOMMatrixReadOnly(indicatorState.transform);
+            nextTabs.classList.add("mode-indicator-reset");
+            nextTabs.style.setProperty("--mode-x", `${matrix.m41}px`);
+            nextTabs.style.setProperty("--mode-y", `${matrix.m42}px`);
+            nextTabs.style.setProperty("--mode-width", indicatorState.width);
+            nextTabs.style.setProperty("--mode-height", indicatorState.height);
+        }
         insertedRoot.offsetHeight;
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
                 insertedRoot.classList.remove(`mode-enter-${direction}`);
-                window.setTimeout(() => {
-                    window.EnglishStudyModeTransitioning = false;
-                }, 360);
+                if (nextTabs) {
+                    nextTabs.classList.remove("mode-indicator-reset");
+                    motion.positionModeIndicator(nextTabs.querySelector(".active"));
+                }
             });
         });
+        await wait(motion.duration("--page-transition-normal"));
+        window.EnglishStudyModeTransitioning = false;
         return true;
     }
 
@@ -398,7 +436,7 @@
         await closeKoreanPanelBeforeStudyTransition();
         applyStudyTextNavChangeClasses(currentRoot, navChanges);
         currentRoot.classList.add(`text-exit-${direction}`);
-        await wait(240);
+        await wait(motion.duration("--motion-exit"));
 
         document.title = nextDocument.title;
         applyStudyTextNavChangeClasses(nextRoot, navChanges);
@@ -414,6 +452,7 @@
                 insertedRoot.classList.remove("nav-change-previous", "nav-change-next");
             });
         });
+        await wait(motion.duration("--page-transition-normal"));
         return true;
     }
 
@@ -435,7 +474,7 @@
 
         document.title = nextDocument.title;
         document.body.classList.add("select-launching");
-        await wait(380);
+        await wait(motion.duration("--page-transition-fast"));
 
         nextRoot.classList.add("select-enter");
         currentCleanup();
@@ -448,6 +487,7 @@
                 insertedRoot.classList.remove("select-enter");
             });
         });
+        await wait(motion.duration("--page-transition-normal"));
         return true;
     }
 
@@ -494,6 +534,7 @@
         const historyMode = options.history || "none";
         const sourceLink = options.sourceLink || null;
         const requestToken = ++currentRequestToken;
+        let releaseTransition;
 
         try {
             const response = await fetch(targetUrl.href, {
@@ -513,6 +554,13 @@
 
             const nextDocument = new DOMParser().parseFromString(html, "text/html");
             const finalUrl = response.url || targetUrl.href;
+            // Fetch ahead, but never replace the DOM halfway through another transition.
+            const previousTransition = pendingTransition;
+            pendingTransition = new Promise((resolve) => { releaseTransition = resolve; });
+            await previousTransition;
+            if (requestToken !== currentRequestToken) {
+                return;
+            }
             if (await transitionSelectPage(nextDocument, finalUrl)) {
                 if (historyMode === "push") {
                     window.history.pushState({}, "", finalUrl);
@@ -567,7 +615,12 @@
 
             window.scrollTo(0, 0);
         } catch (error) {
+            window.EnglishStudyModeTransitioning = false;
             window.location.href = targetUrl.href;
+        } finally {
+            if (releaseTransition) {
+                releaseTransition();
+            }
         }
     }
 
@@ -578,6 +631,9 @@
         }
 
         event.preventDefault();
+        if (link.matches(".study-mode-button.active")) {
+            return;
+        }
         loadPage(link.href, { history: link.dataset.navigationHistory || "none", sourceLink: link });
     });
 

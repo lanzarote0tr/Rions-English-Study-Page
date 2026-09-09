@@ -10,11 +10,23 @@
             <div class="study-container">
                 <header class="app-header study-title-wrapper">
                     <h1 class="app-header-title study-title">{{ text["title"] }}</h1>
-                    {% if text["parent_dir_path"] %}
-                    <a class="app-header-action back-link" id="backLink" href="{{ url_for('select_page', subdirectory=text["parent_dir_path"]) }}">&laquo; 목록으로 (Shift+E)</a>
-                    {% else %}
-                    <a class="app-header-action back-link" id="backLink" href="{{ url_for('select_page') }}">&laquo; 목록으로 (Shift+E)</a>
-                    {% endif %}
+                    <div class="study-header-actions">
+                        {% if text["parent_dir_path"] %}
+                        <a class="app-header-action back-link" id="backLink" href="{{ url_for('select_page', subdirectory=text["parent_dir_path"]) }}">&laquo; 목록으로</a>
+                        {% else %}
+                        <a class="app-header-action back-link" id="backLink" href="{{ url_for('select_page') }}">&laquo; 목록으로</a>
+                        {% endif %}
+                        <details class="study-more" id="studyMore">
+                            <summary class="study-more-toggle" id="studyMoreToggle" aria-label="더보기">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+                                    <circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>
+                                </svg>
+                            </summary>
+                            <div class="study-more-panel">
+                                <button type="button" id="studyShortcutsButton" aria-haspopup="dialog" aria-controls="shortcutsDialog">단축키</button>
+                            </div>
+                        </details>
+                    </div>
                 </header>
                 <div class="study-content-row">
                     <div class="study-main-panel">
@@ -52,6 +64,51 @@
                 </div>
             </div>
         </div>
+        <dialog class="shortcuts-dialog" id="shortcutsDialog" aria-labelledby="shortcutsTitle">
+            <div class="shortcuts-heading">
+                <h2 id="shortcutsTitle">단축키</h2>
+                <button type="button" class="shortcuts-close" id="shortcutsClose" autofocus>닫기</button>
+            </div>
+            <div class="shortcuts-groups">
+                <section class="shortcuts-group" aria-labelledby="shortcutsCommonTitle">
+                    <h3 id="shortcutsCommonTitle">공통</h3>
+                    <dl>
+                        <div><dt>목록으로</dt><dd><kbd>Shift</kbd> + <kbd>E</kbd></dd></div>
+                        <div><dt>전체화면 전환</dt><dd><kbd>Shift</kbd> + <kbd>F</kbd></dd></div>
+                        <div><dt>이전 / 다음 글</dt><dd><kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd></dd></div>
+                        <div><dt>이전 / 다음 학습 모드</dt><dd><kbd>Shift</kbd> + <kbd>,</kbd> / <kbd>.</kbd></dd></div>
+                    </dl>
+                </section>
+                <section class="shortcuts-group" aria-labelledby="shortcutsPracticeTitle">
+                    <h3 id="shortcutsPracticeTitle">글쓰기</h3>
+                    <dl>
+                        <div><dt>한글 해석 전환</dt><dd><kbd>Shift</kbd> + <kbd>K</kbd></dd></div>
+                        <div><dt>미리보기 전환</dt><dd><kbd>Shift</kbd> + <kbd>O</kbd></dd></div>
+                        <div><dt>일부 미리보기 전환</dt><dd><kbd>Shift</kbd> + <kbd>H</kbd></dd></div>
+                        <div><dt>이전 입력 지우기</dt><dd><kbd>Backspace</kbd></dd></div>
+                    </dl>
+                </section>
+                <section class="shortcuts-group" aria-labelledby="shortcutsFillTitle">
+                    <h3 id="shortcutsFillTitle">단어 채우기</h3>
+                    <dl>
+                        <div><dt>한글 해석 전환</dt><dd><kbd>Shift</kbd> + <kbd>K</kbd></dd></div>
+                        <div><dt>미리보기 전환</dt><dd><kbd>Shift</kbd> + <kbd>H</kbd></dd></div>
+                        <div><dt>앞글자만 보기 전환</dt><dd><kbd>Shift</kbd> + <kbd>I</kbd></dd></div>
+                        <div><dt>이전 / 다음 빈칸</dt><dd><kbd>Shift</kbd> + <kbd>←</kbd> / <kbd>→</kbd></dd></div>
+                        <div><dt>다음 빈칸</dt><dd><kbd>Enter</kbd> / <kbd>Tab</kbd></dd></div>
+                        <div><dt>이전 빈칸</dt><dd><kbd>Shift</kbd> + <kbd>Tab</kbd></dd></div>
+                    </dl>
+                </section>
+                <section class="shortcuts-group" aria-labelledby="shortcutsLineTitle">
+                    <h3 id="shortcutsLineTitle">한줄해석</h3>
+                    <dl>
+                        <div><dt>이전 / 다음 문장</dt><dd><kbd>↑</kbd> / <kbd>↓</kbd></dd></div>
+                        <div><dt>첫 / 마지막 문장</dt><dd><kbd>Home</kbd> / <kbd>End</kbd></dd></div>
+                    </dl>
+                </section>
+            </div>
+            <p class="shortcuts-note">한글 해석은 번역이 있는 글에서만 사용할 수 있습니다.<br>완료창은 클릭·마우스 움직임·아무 키 입력으로, 이 안내창은 Esc로도 닫을 수 있습니다.</p>
+        </dialog>
         <div id="cursor" class="cursor"></div>
         <script id="study-data" type="application/json">{{ {"text": text, "mode": mode}|tojson }}</script>
     </div>

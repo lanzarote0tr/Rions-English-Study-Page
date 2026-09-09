@@ -160,7 +160,34 @@
         return "practice";
     }
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function motionDuration(property) {
+        if (reducedMotion.matches) {
+            return 0;
+        }
+        const value = getComputedStyle(document.documentElement).getPropertyValue(property).trim();
+        return (parseFloat(value) || 0) * (value.endsWith("ms") ? 1 : 1000);
+    }
+
+    function positionModeIndicator(button) {
+        const tabs = button && button.closest(".study-mode-tabs");
+        if (!tabs) {
+            return;
+        }
+        tabs.style.setProperty("--mode-x", `${button.offsetLeft}px`);
+        tabs.style.setProperty("--mode-y", `${button.offsetTop}px`);
+        tabs.style.setProperty("--mode-width", `${button.offsetWidth}px`);
+        tabs.style.setProperty("--mode-height", `${button.offsetHeight}px`);
+        tabs.classList.add("has-mode-indicator");
+    }
+
     window.EnglishStudy = {
+        motion: {
+            reduced: () => reducedMotion.matches,
+            duration: motionDuration,
+            positionModeIndicator,
+        },
         settings: {
             defaults: defaultSettings,
             load: loadSettings,
