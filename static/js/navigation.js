@@ -134,67 +134,6 @@
         return nextRoot;
     }
 
-    function waitForImage(image) {
-        if (!image) {
-            return Promise.resolve();
-        }
-        const source = image.currentSrc || image.src;
-        if (!source) {
-            return Promise.resolve();
-        }
-        return new Promise((resolve) => {
-            const preloader = new Image();
-            preloader.addEventListener("load", resolve, { once: true });
-            preloader.addEventListener("error", resolve, { once: true });
-            preloader.src = source;
-            if (preloader.complete) {
-                resolve();
-            }
-        });
-    }
-
-    async function crossfadeSelectImage(currentContainer, nextContainer) {
-        const currentHeader = currentContainer.querySelector(".image-header");
-        const nextHeader = nextContainer.querySelector(".image-header");
-        const currentImage = currentHeader ? currentHeader.querySelector("img") : null;
-        const nextImage = nextHeader ? nextHeader.querySelector("img") : null;
-
-        if (nextImage) {
-            await waitForImage(nextImage);
-        }
-
-        if (currentImage && nextImage && currentImage.src === nextImage.src) {
-            return "none";
-        }
-
-        if (currentHeader && currentImage && nextImage) {
-            const currentLayer = currentImage.cloneNode(false);
-            const nextLayer = nextImage.cloneNode(false);
-            currentLayer.className = "select-image-layer select-image-current";
-            nextLayer.className = "select-image-layer select-image-next";
-            currentHeader.append(currentLayer, nextLayer);
-            currentHeader.classList.add("select-image-transition");
-            currentHeader.offsetHeight;
-            currentHeader.classList.add("is-crossfading");
-            await wait(motion.duration("--page-transition-normal"));
-            return "crossfade";
-        }
-
-        if (currentHeader && !nextImage) {
-            currentHeader.classList.add("select-image-fading-out");
-            await wait(motion.duration("--page-transition-normal"));
-            return "fade-out";
-        }
-
-        if (!currentHeader && nextImage) {
-            await wait(180);
-            return "enter";
-        }
-
-        await wait(180);
-        return "none";
-    }
-
     async function crossfadeSelectContent(currentContainer, nextContainer) {
         const currentContent = currentContainer.querySelector(".content-wrapper");
         const nextContent = nextContainer.querySelector(".content-wrapper");
@@ -247,21 +186,6 @@
         }, 560);
     }
 
-    function animateSelectImageIn(container) {
-        const imageHeader = container.querySelector(".image-header");
-        if (!imageHeader) {
-            return;
-        }
-        imageHeader.classList.add("select-image-enter");
-        imageHeader.offsetHeight;
-        window.requestAnimationFrame(() => {
-            imageHeader.classList.add("is-visible");
-        });
-        window.setTimeout(() => {
-            imageHeader.classList.remove("select-image-enter", "is-visible");
-        }, 520);
-    }
-
     async function transitionSelectPage(nextDocument, finalUrl) {
         if (document.body.dataset.page !== "select" || nextDocument.body.dataset.page !== "select") {
             return false;
@@ -283,10 +207,7 @@
         currentRoot.dataset.currentPath = nextRoot.dataset.currentPath || "";
 
         currentContainer.classList.add("is-menu-transitioning");
-        await Promise.all([
-            crossfadeSelectImage(currentContainer, nextContainer),
-            crossfadeSelectContent(currentContainer, nextContainer),
-        ]);
+        await crossfadeSelectContent(currentContainer, nextContainer);
 
         currentCleanup();
         currentContainer.replaceWith(nextContainer);
@@ -317,6 +238,7 @@
         document.body.classList.add("study-launching");
         currentContainer.classList.add("is-study-opening");
         sourceItem.classList.add("is-study-source-card");
+        await wait(motion.duration("--page-transition-normal"));
         currentContainer.classList.add("is-study-committing");
         await wait(motion.duration("--page-transition-fast"));
 

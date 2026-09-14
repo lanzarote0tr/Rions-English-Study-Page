@@ -1,0 +1,36 @@
+A **neuropsychologist**, Michael **Gazzaniga** conducted a **study** that shows that our brains excel at creating **coherent** (but not **necessarily** true) stories that deceive us.
+신경심리학자 Michael Gazzaniga는 우리 뇌가 일관되지만 반드시 진실하지는 않은 이야기를 만들어 우리를 속이는 데 뛰어나다는 것을 보여 주는 연구를 했다.
+In the **study**, **split-brain** **patients** were shown an image such that it was visible to only their **left** eye and **asked** to select a related card with their **left** hand.
+그 연구에서 분할 뇌 환자에게 왼쪽 눈으로만 볼 수 있는 이미지를 보여 주고 왼손으로 관련 카드를 고르게 했다.
+Left-eye vision and left-side body movement are controlled by the **right** **hemisphere**.
+왼쪽 눈의 시각과 왼쪽 신체의 움직임은 우뇌가 통제한다.
+In a **split-brain** patient, the connection between the **right** and **left** **hemispheres** has been broken, meaning no **information** can cross from one **hemisphere** to the other.
+분할 뇌 환자는 좌뇌와 우뇌 사이의 연결이 끊어져 있어 한쪽 반구의 정보가 다른 쪽으로 건너갈 수 없다.
+Therefore, in this experiment, the **right** **hemisphere** was doing all of the work, and the **left** **hemisphere** was unaware of what was happening.
+따라서 이 실험에서는 우뇌가 모든 일을 하고 있었고 좌뇌는 무슨 일이 일어나는지 알지 못했다.
+**Gazzaniga** then **asked** **participants** why they chose the card that they did.
+그런 다음 Gazzaniga는 참가자들에게 왜 그 카드를 골랐는지 물었다.
+Because language is processed and generated in the **left** **hemisphere**, the **left** **hemisphere** is required to respond.
+언어는 좌뇌에서 처리되고 생성되므로 질문에 대답하려면 좌뇌가 필요하다.
+However, because of the **experiment’s** design, only the **right** **hemisphere** knew why the **participant** selected the card.
+하지만 실험 설계상 참가자가 카드를 고른 이유를 아는 것은 우뇌뿐이었다.
+As a result, **Gazzaniga** expected the **participants** to be silent when **asked** to **answer** the question.
+그래서 Gazzaniga는 질문에 답하라는 요구를 받으면 참가자들이 침묵할 것이라고 예상했다.
+But instead, every subject fabricated a response.
+하지만 실제로는 모든 피험자가 대답을 지어냈다.
+The **left** **hemisphere** was being **asked** to provide a **rationalization** for a behavior done by the **right** **hemisphere**.
+좌뇌는 우뇌가 한 행동에 대한 합리화를 제시하라는 요구를 받고 있었다.
+The **left** **hemisphere** didn’t know the **answer**.
+좌뇌는 답을 알지 못했다.
+But that didn’t keep it from **fabricating** an **answer**.
+그러나 그렇다고 해서 답을 지어내지 못한 것은 아니었다.
+That **answer**, however, had no basis in reality.
+하지만 그 답에는 현실에 근거가 없었다.
+Now if this **study** had been limited to **split-brain** **patients**, it would be **interesting** but not very relevant to us.
+이 연구가 분할 뇌 환자에게만 한정되었다면 흥미롭기는 해도 우리와는 그다지 관련이 없었을 것이다.
+It turns out **split-brain** **patients** aren’t the only ones who fabricate reasons.
+분할 뇌 환자만 이유를 지어내는 것은 아니라는 사실이 밝혀졌다.
+We all do it.
+우리 모두 그렇게 한다.
+We all need a **coherent** story about ourselves, and when **information** in that story is missing, our brains simply fill in the details.
+우리 모두는 자신에 관한 일관된 이야기를 필요로 하며, 그 이야기에서 정보가 빠지면 뇌는 단순히 세부 내용을 채워 넣는다.

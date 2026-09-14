@@ -55,74 +55,8 @@ body.page-select {
     transition: opacity var(--page-transition-normal) ease;
 }
 
-.image-header {
-    --image-inset: clamp(22px, 3.2vw, 48px);
-    --image-bottom: var(--image-inset);
-    position: relative;
-    flex: 0 0 clamp(300px, 31vw, 470px);
-    min-width: 0;
-    height: 100%;
-    padding: var(--image-inset) var(--image-inset) var(--image-bottom);
-    overflow: hidden;
-    background: var(--surface-soft);
-    transition: opacity var(--page-transition-normal) ease, transform var(--page-transition-normal) var(--page-transition-ease);
-}
-
-.image-header::after {
-    position: absolute;
-    inset: var(--image-inset) var(--image-inset) var(--image-bottom);
-    z-index: 1;
-    border-radius: 24px;
-    background: linear-gradient(180deg, rgba(11, 29, 23, 0.02) 44%, rgba(11, 29, 23, 0.30));
-    content: "";
-    pointer-events: none;
-}
-
-.image-header img {
-    position: absolute;
-    top: var(--image-inset);
-    left: var(--image-inset);
-    z-index: 0;
-    width: calc(100% - 2 * var(--image-inset));
-    height: calc(100% - var(--image-inset) - var(--image-bottom));
-    border-radius: 24px;
-    object-fit: cover;
-    filter: saturate(0.76) contrast(0.96);
-}
-
 .select-container.is-menu-transitioning {
     pointer-events: none;
-}
-
-.select-image-transition > img:not(.select-image-layer) {
-    opacity: 0;
-}
-
-.select-image-layer {
-    transition: opacity var(--page-transition-normal) ease;
-}
-
-.select-image-current {
-    opacity: 1;
-}
-
-.select-image-next {
-    opacity: 0;
-}
-
-.select-image-transition.is-crossfading .select-image-current,
-.select-image-fading-out {
-    opacity: 0;
-}
-
-.select-image-transition.is-crossfading .select-image-next,
-.select-image-enter.is-visible {
-    opacity: 1;
-}
-
-.select-image-enter {
-    opacity: 0;
-    transition: opacity var(--page-transition-normal) ease;
 }
 
 .content-wrapper,
@@ -653,7 +587,15 @@ body.page-select {
     pointer-events: none;
 }
 
-.select-container.is-study-opening .image-header,
+.page-select.study-launching #page-root {
+    background: var(--surface-color);
+}
+
+.select-container.is-study-opening .file-list {
+    margin-inline: -24px;
+    padding-inline: 24px;
+}
+
 .select-container.is-study-opening .top-bar,
 .select-container.is-study-opening .upload-panel {
     opacity: 0;
@@ -665,12 +607,16 @@ body.page-select {
 
 .select-container.is-study-opening .file-list li.is-study-source-card {
     opacity: 1;
-    transform: scale(1.015);
+    transform: scale(1.1);
+    transition: opacity var(--page-transition-fast) ease,
+        transform var(--page-transition-normal) cubic-bezier(0.34, 1.7, 0.3, 1);
 }
 
 .select-container.is-study-committing .file-list li.is-study-source-card {
     opacity: 0;
-    transform: scale(0.985);
+    transform: scale(1.03);
+    transition: opacity var(--page-transition-fast) ease,
+        transform var(--page-transition-fast) ease;
 }
 
 .page-select.study-launching .app-header,
@@ -683,11 +629,17 @@ body.page-select {
     opacity: 0;
 }
 
+.page-select.study-launching .floating-profile {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .profile-container.floating-profile {
     position: fixed;
     right: clamp(20px, 3vw, 48px);
     bottom: clamp(20px, 3vw, 42px);
     z-index: 30;
+    transition: opacity var(--page-transition-fast) ease;
 }
 
 .profile-pic {
@@ -888,23 +840,6 @@ body.page-select {
 @media (max-width: 900px) {
     .select-container {
         flex-direction: column;
-    }
-
-    .image-header {
-        --image-inset: 18px;
-        --image-bottom: 0px;
-        flex: 0 0 clamp(128px, 22vh, 190px);
-        width: 100%;
-        height: auto;
-    }
-
-    .image-header::after {
-        border-radius: 18px;
-    }
-
-    .image-header img,
-    .select-image-layer {
-        border-radius: 18px;
     }
 
     .content-wrapper,

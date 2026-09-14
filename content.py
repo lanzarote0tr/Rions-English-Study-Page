@@ -1,13 +1,11 @@
 import logging
-import random
 from functools import lru_cache
 from pathlib import Path
 
-from flask import abort, url_for
+from flask import abort
 
 APP_ROOT = Path(__file__).resolve().parent
 TEXTS_BASE_DIR = (APP_ROOT / "texts").resolve()
-IMAGE_DIR = (APP_ROOT / "static" / "img").resolve()
 HANGUL_RANGE = ("가", "힣")
 LOCAL_TEXT_PREFIX = "__local__/"
 
@@ -184,27 +182,6 @@ def load_text_payload(text_path: str) -> dict[str, object]:
         abort(500, f"Error reading file: {exc}")
 
 
-@lru_cache(maxsize=8)
-def image_names(signature: tuple[int, int]) -> tuple[str, ...]:
-    del signature
-    return tuple(
-        image.name
-        for image in IMAGE_DIR.iterdir()
-        if image.is_file() and image.stem.lower() != "rion" and image.name.lower() != "clear.gif"
-    )
-
-
-def get_random_image_url() -> str | None:
-    if not IMAGE_DIR.exists():
-        return None
-
-    image_files = image_names(path_signature(IMAGE_DIR))
-    if not image_files:
-        return None
-
-    return url_for("static", filename=f"img/{random.choice(image_files)}")
-
-
 def build_browse_payload(subdirectory: str = "", allow_missing: bool = False) -> dict[str, object]:
     breadcrumbs, parent_path = build_breadcrumbs(subdirectory)
     items = []
@@ -219,7 +196,6 @@ def build_browse_payload(subdirectory: str = "", allow_missing: bool = False) ->
         "parent_path": parent_path,
         "breadcrumbs": breadcrumbs,
         "items": items,
-        "random_image_url": get_random_image_url(),
     }
 
 
@@ -236,9 +212,6 @@ def build_text_payload(text_path: str) -> dict[str, object]:
             "previous_text_path": None,
             "next_text_path": None,
             "parent_dir_path": path.parent.as_posix() if path.parent.as_posix() != "." else "",
-            "random_image_url": get_random_image_url(),
         }
 
-    payload = load_text_payload(text_path)
-    payload["random_image_url"] = get_random_image_url()
-    return payload
+    return load_text_payload(text_path)

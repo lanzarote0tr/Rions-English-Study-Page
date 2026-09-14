@@ -1,0 +1,18 @@
+There may be great **advantages** **associated** with **radical** **design**, but new kinds of risks often arise as well.
+급진적 설계에는 큰 장점이 있을 수 있지만 새로운 종류의 위험도 자주 발생한다.
+One such example is the **introduction** of the jet engine.
+그러한 예 중 하나가 제트 엔진의 도입이다.
+Not long after jet engines were **introduced** into the civil aviation industry, two **aircraft** of that kind, the rather **unfortunately** named de **Havilland** Comet, crashed.
+제트 엔진이 민간 항공 산업에 도입된 지 얼마 지나지 않아, 다소 불운한 이름의 de Havilland Comet이라는 그런 종류의 항공기 두 대가 추락했다.
+The problem lay less in the engine itself than in the fact that **jet-powered** **aircraft** flew at much higher altitudes than previous **aircraft** had done.
+문제는 엔진 자체보다는 제트 동력 항공기가 이전 항공기보다 훨씬 높은 고도에서 비행했다는 사실에 있었다.
+This meant that the cabin had to be **pressurized** to make the flight **comfortable** for **passengers**.
+이는 승객이 편안하게 비행할 수 있도록 객실에 압력을 가해야 한다는 뜻이었다.
+As a result, some parts of the airframe were subjected to greater stresses than before.
+그 결과 동체의 일부가 이전보다 더 큰 응력을 받았다.
+This **eventually** caused metal fatigue and **ultimately** led to disaster.
+이는 결국 금속 피로를 일으켜 재앙으로 이어졌다.
+This **demonstrates** that an existing framework designed to protect a **particular** moral value, in this case safety, cannot **automatically** be **transferred** to **radical** **design**.
+이는 특정한 도덕적 가치, 이 경우에는 안전을 보호하기 위해 설계된 기존의 틀이 급진적 설계에 자동으로 적용될 수 없다는 것을 보여 준다.
+Thus, when choosing between normal and **radical** **design**, there are moral **considerations** as well as technical ones.
+따라서 보통 설계와 급진적 설계 중에서 선택할 때는 기술적 고려뿐 아니라 도덕적 고려도 필요하다.

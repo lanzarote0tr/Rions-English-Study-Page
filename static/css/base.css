@@ -38,7 +38,7 @@
     --app-header-title-line-height: 1.3;
     --motion-exit: 160ms;
     --motion-ui: 240ms;
-    --motion-line: 160ms;
+    --motion-line: 300ms;
     --motion-line-ease: cubic-bezier(0.2, 0.72, 0.16, 1);
     --page-transition-fast: 220ms;
     --page-transition-normal: 400ms;

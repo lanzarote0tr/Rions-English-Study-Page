@@ -1,0 +1,18 @@
+We live in a world made of **software**, so **programmers** are **architects**.
+우리는 소프트웨어로 만들어진 세상에 살고 있으므로 프로그래머는 건축가이다.
+The **decisions** they make guide our **behavior**.
+그들이 내리는 결정은 우리의 행동을 이끈다.
+When they make **something** newly easy to do, we do a lot more of it.
+그들이 어떤 일을 새롭게 쉽게 만들면 우리는 그 일을 훨씬 더 많이 한다.
+If they make it hard or **impossible** to do **something**, we do less of it.
+그들이 어떤 일을 어렵거나 불가능하게 만들면 우리는 그 일을 덜 한다.
+When **computer** **programmers** made the first blogging tools in the late 1990s and early 2000s, it led to an **explosion** of **self-expression**: when it suddenly became easy to publish **something**, millions more people did it.
+컴퓨터 프로그래머들이 1990년대 후반과 2000년대 초반에 최초의 블로그 도구를 만들었을 때 자기표현이 폭발적으로 늘어났다. 무언가를 발표하는 일이 갑자기 쉬워지자 수백만 명이 더 그렇게 했다.
+And when **programmers** invented **file-sharing** tools around the same time, shock waves rippled through **entertainment** **industries** as they watched their lock on **distribution** vanish **overnight**.
+그리고 비슷한 시기에 프로그래머들이 파일 공유 도구를 발명하자, 예능 산업들이 배포에 대한 통제권이 하룻밤 사이에 사라지는 것을 보면서 산업 전반에 충격이 퍼졌다.
+In fact, they fought back by hiring their own **programmers** to invent **digital-rights-management** **software**, which they embedded in music and movie releases, trying to create **artificial** scarcity by making it harder for ordinary people to copy the products and **distribute** them to friends.
+사실 그들은 자체 프로그래머를 고용해 디지털 저작권 관리 소프트웨어를 발명하고 이를 음악과 영화 출시물에 넣어 반격했다. 평범한 사람들이 제품을 복제해 친구에게 배포하기 어렵게 만들어 인위적 희소성을 만들려 한 것이다.
+Wealthy interest groups will fund **software** that fights in the opposite **direction** if they do not like what some **code** is doing.
+부유한 이익 집단은 어떤 코드가 하는 일이 마음에 들지 않으면 반대 방향으로 싸우는 소프트웨어에 자금을 댄다.
+**Code** giveth, and **code** taketh away.
+코드는 주기도 하고 빼앗기도 한다.

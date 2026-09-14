@@ -1,0 +1,14 @@
+It might be said that **language** makes us think about **certain** **things**, but perhaps its main effect is to make us not think about **certain** **things**.
+언어가 우리에게 특정한 것을 생각하게 만든다고 말할 수도 있지만, 아마도 언어의 주된 효과는 우리가 특정한 것을 생각하지 않게 하는 데 있을 것이다.
+It is well **established** that we fail to notice much of what happens around us.
+우리가 주변에서 일어나는 일의 많은 부분을 알아차리지 못한다는 것은 잘 입증되어 있다.
+**Research** on human **decision-making** shows that we **routinely** **ignore** some of the **information** **available** to us, and this actually makes **considerable** sense.
+인간의 의사 결정에 관한 연구는 우리가 이용할 수 있는 정보 중 일부를 일상적으로 무시한다는 것을 보여 주며, 이것은 실제로 상당히 타당하다.
+Part of the logic of **decision-making** is to **ignore** **information** that seems **irrelevant** to the **decision** **currently** at hand.
+의사 결정 논리의 일부는 현재 내려야 할 결정과 무관해 보이는 정보를 무시하는 것이다.
+This is true for **everything** from small **decisions**, such as choosing which brand of cereal to buy, to major **decisions**, such as finding a life partner.
+이것은 어느 브랜드의 시리얼을 살지 고르는 작은 결정부터 인생의 동반자를 찾는 큰 결정까지 모두 마찬가지다.
+Once we focus our **attention** on a **decision** problem, the next step is to find a way to narrow and close the search for an **appropriate** solution by making the **decision** that produces the best **trade-off**, a **desirable** benefit at the lowest cost.
+일단 의사 결정 문제에 주의를 집중하면 다음 단계는 가장 낮은 비용으로 바람직한 이익을 얻는 최선의 균형을 선택하여 적절한 해결책을 찾는 범위를 좁히고 검색을 끝내는 방법을 찾는 것이다.
+And we need to make **decisions** quickly in order to continue with the **decisions** that come next.
+그리고 다음 결정을 계속하기 위해서는 신속하게 결정을 내려야 한다.
