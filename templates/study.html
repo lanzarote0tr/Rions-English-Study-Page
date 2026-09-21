@@ -30,26 +30,27 @@
                 </header>
                 <div class="study-content-row">
                     <div class="study-main-panel">
-                        <div id="text-display" class="text-display{% if mode == 'practice' %} practice-display{% endif %}{% if mode == 'line' %} line-translation-display{% endif %}" {% if mode == 'practice' %}tabindex="0"{% endif %}></div>
+                        <div id="text-display" class="text-display{% if mode == 'notes' %} annotation-display{% endif %}{% if mode == 'practice' %} practice-display{% endif %}{% if mode == 'line' %} line-translation-display{% endif %}" {% if mode == 'practice' %}tabindex="0"{% endif %}></div>
                         <button type="button" class="fullscreen-toggle" id="fullscreenToggle" aria-label="전체화면 전환" title="전체화면">⛶</button>
                         <div class="controls">
                             <div class="navigation-buttons">
                                 <div class="nav-side nav-side-previous{% if not text["previous_text_path"] %} nav-side-empty{% endif %}">
                                 {% if text["previous_text_path"] %}
-                                <a class="nav-button" id="previousTextLink" href="{{ url_for('study_page', text_path=text["previous_text_path"], mode=mode if mode != 'practice' else None) }}">&laquo; 이전 글</a>
+                                <a class="nav-button" id="previousTextLink" href="{{ url_for('study_page', text_path=text["previous_text_path"], mode=mode if mode != 'notes' else None) }}">&laquo; 이전 글</a>
                                 {% else %}
                                 <span class="nav-button-placeholder" aria-hidden="true"></span>
                                 {% endif %}
                                 </div>
                                 <div class="nav-side nav-side-next{% if not text["next_text_path"] %} nav-side-empty{% endif %}">
                                 {% if text["next_text_path"] %}
-                                <a class="nav-button" id="nextTextLink" href="{{ url_for('study_page', text_path=text["next_text_path"], mode=mode if mode != 'practice' else None) }}">다음 글 &raquo;</a>
+                                <a class="nav-button" id="nextTextLink" href="{{ url_for('study_page', text_path=text["next_text_path"], mode=mode if mode != 'notes' else None) }}">다음 글 &raquo;</a>
                                 {% else %}
                                 <span class="nav-button-placeholder" aria-hidden="true"></span>
                                 {% endif %}
                                 </div>
                                 <div class="study-mode-tabs">
-                                    <a class="study-mode-button{% if mode == 'practice' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"]) }}">글쓰기</a>
+                                    <a class="study-mode-button{% if mode == 'notes' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"]) }}">필기</a>
+                                    <a class="study-mode-button{% if mode == 'practice' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"], mode='practice') }}">글쓰기</a>
                                     <a class="study-mode-button{% if mode == 'fill' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"], mode='fill') }}">단어 채우기</a>
                                     <a class="study-mode-button{% if mode == 'line' %} active{% endif %}" href="{{ url_for('study_page', text_path=text["text_path"], mode='line') }}">한줄 해석</a>
                                 </div>

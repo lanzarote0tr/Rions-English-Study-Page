@@ -862,6 +862,231 @@ body.study-fullscreen-active .fullscreen-toggle {
     transform: translateX(18px);
 }
 
+.annotation-display {
+    --annotation-red: #dc2f3f;
+    --annotation-yellow: #ffe36b;
+    --annotation-blue: #3478d4;
+    white-space: normal;
+    user-select: text;
+}
+
+.annotation-display::selection,
+.annotation-display *::selection {
+    color: #152033;
+    background: #9fc8ff;
+}
+
+.annotation-segment {
+    cursor: text;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+.annotation-segment[data-annotation-note-ids] {
+    cursor: pointer;
+}
+
+.annotation-underline {
+    text-decoration-line: underline;
+    text-decoration-color: var(--annotation-red);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 5px;
+    text-decoration-skip-ink: none;
+}
+
+.annotation-highlight {
+    border-radius: 3px;
+    color: #171717;
+    background: var(--annotation-yellow);
+}
+
+.annotation-box {
+    padding: 0 0.1em;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 2px var(--annotation-blue);
+}
+
+
+.annotation-notes {
+    position: absolute;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    max-width: min(280px, 70vw);
+    pointer-events: none;
+}
+
+.annotation-note {
+    display: block;
+    max-width: min(260px, 64vw);
+    padding: 0 3px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--bg-color) 88%, transparent);
+    font-size: clamp(0.64rem, 0.42em, 0.82rem);
+    font-weight: 750;
+    line-height: 1.05;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.annotation-note-underline {
+    color: var(--annotation-red);
+}
+
+.annotation-note-box {
+    color: var(--annotation-blue);
+}
+
+.annotation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.annotation-tool {
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color-light);
+    background: var(--surface-soft);
+    font-size: 0.72rem;
+    font-weight: 750;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.annotation-tool:hover {
+    color: var(--text-color);
+    background: var(--surface-muted);
+    transform: translateY(-1px);
+}
+
+.annotation-tool-underline {
+    border-bottom: 3px solid var(--annotation-red);
+}
+
+.annotation-tool-highlight {
+    border-bottom: 3px solid var(--annotation-yellow);
+    color: var(--text-color-light);
+    background: var(--surface-soft);
+}
+
+.annotation-tool-highlight:hover {
+    color: var(--text-color);
+    background: var(--surface-muted);
+}
+
+.annotation-tool-box {
+    border-color: var(--annotation-blue);
+    color: var(--annotation-blue);
+}
+
+
+.annotation-tool-remove,
+.annotation-tool-clear {
+    font-weight: 650;
+}
+
+.annotation-toolbar-divider {
+    width: 1px;
+    height: 24px;
+    margin: 0 2px;
+    background: var(--border-color);
+}
+
+.annotation-theme-control {
+    margin-left: 4px;
+}
+
+.annotation-note-dialog {
+    width: min(440px, calc(100vw - 30px));
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    color: var(--text-color);
+    background: var(--surface-color);
+    box-shadow: 0 18px 60px var(--shadow-strong);
+}
+
+.annotation-note-dialog::backdrop {
+    background: rgb(0 0 0 / 28%);
+}
+
+.annotation-note-form {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+    text-align: left;
+}
+
+.annotation-note-form h2,
+.annotation-note-form p {
+    margin: 0;
+}
+
+.annotation-note-form h2 {
+    font-size: 1.08rem;
+}
+
+.annotation-note-form p {
+    color: var(--text-color-light);
+    font-size: 0.78rem;
+    line-height: 1.6;
+}
+
+.annotation-note-form input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    color: var(--text-color);
+    background: var(--bg-color);
+    font: inherit;
+}
+
+.annotation-note-form input:focus {
+    border-color: var(--accent-color);
+    outline: 2px solid var(--accent-soft);
+}
+
+.annotation-note-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.annotation-note-actions button {
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    color: var(--text-color-light);
+    background: var(--surface-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.annotation-note-actions button.primary {
+    color: white;
+    background: var(--accent-color);
+}
+
+.annotation-note-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
 .korean-widget {
     grid-column: 2;
     grid-row: 1;
@@ -1194,6 +1419,23 @@ body.korean-visible .korean-widget {
 
     .switch-label {
         font-size: 0.72rem;
+    }
+
+    .annotation-toolbar {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .annotation-tool {
+        flex: 1 1 112px;
+    }
+
+    .annotation-toolbar-divider {
+        display: none;
+    }
+
+    .annotation-theme-control {
+        margin-left: 0;
     }
 
     .text-display {

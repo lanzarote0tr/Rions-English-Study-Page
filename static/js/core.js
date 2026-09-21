@@ -154,10 +154,10 @@
     }
 
     function normalizeStudyMode(mode) {
-        if (mode === "fill" || mode === "line") {
+        if (mode === "notes" || mode === "practice" || mode === "fill" || mode === "line") {
             return mode;
         }
-        return "practice";
+        return "notes";
     }
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");

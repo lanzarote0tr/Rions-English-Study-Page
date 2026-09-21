@@ -564,7 +564,7 @@
             }
 
             function navigateStudyMode(offset) {
-                const modes = ["practice", "fill", "line"];
+                const modes = ["notes", "practice", "fill", "line"];
                 const currentIndex = modes.indexOf(state.mode);
                 if (currentIndex < 0) {
                     return;
@@ -690,6 +690,62 @@
             if (fullscreenToggle) {
                 fullscreenToggle.addEventListener("click", handleFullscreenToggle);
                 updateFullscreenToggle();
+            }
+
+            function initializeNotesMode() {
+                document.body.classList.remove("hide-upcoming", "korean-visible", "line-mode-active");
+                state.koreanVisible = false;
+                const textDisplay = document.getElementById("text-display");
+                const switchContainer = document.getElementById("switchContainer");
+                const statusText = document.getElementById("statusText");
+                const koreanWidget = document.getElementById("korean-widget");
+                const cursor = document.getElementById("cursor");
+                const englishText = (state.text.english_content || "").replace(/\*\*/g, "");
+
+                cursor.style.opacity = "0";
+                koreanWidget.textContent = "";
+
+                const annotationController = window.EnglishStudyAnnotations.createController({
+                    textDisplay,
+                    switchContainer,
+                    statusText,
+                    textPath: state.text.text_path,
+                    text: englishText,
+                    settings: state.settings,
+                    saveSettings,
+                    applyTheme,
+                });
+
+                function handleKeydown(event) {
+                    if (annotationController.noteDialog.open) {
+                        return;
+                    }
+                    if (handleCommonStudyShortcut(event)) {
+                        return;
+                    }
+                    if (event.shiftKey && event.key.toLowerCase() === "e") {
+                        event.preventDefault();
+                        navigateTo("backLink");
+                        return;
+                    }
+                    if (!event.ctrlKey) {
+                        return;
+                    }
+                    if (event.key === "ArrowLeft" && getLinkHref("previousTextLink")) {
+                        event.preventDefault();
+                        navigateTo("previousTextLink");
+                    } else if (event.key === "ArrowRight" && getLinkHref("nextTextLink")) {
+                        event.preventDefault();
+                        navigateTo("nextTextLink");
+                    }
+                }
+
+                document.addEventListener("keydown", handleKeydown);
+                cleanup = () => {
+                    annotationController.destroy();
+                    document.removeEventListener("keydown", handleKeydown);
+                };
+                persistCurrentMode = () => {};
             }
 
             function initializePracticeMode() {
@@ -1979,7 +2035,9 @@
                 updateDarkModeToggle(state.settings);
                 document.body.classList.toggle("line-mode-active", state.mode === "line");
 
-                if (state.mode === "fill") {
+                if (state.mode === "notes") {
+                    initializeNotesMode();
+                } else if (state.mode === "fill") {
                     initializeFillMode();
                 } else if (state.mode === "line") {
                     initializeLineMode();

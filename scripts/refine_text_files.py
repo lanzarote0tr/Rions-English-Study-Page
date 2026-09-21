@@ -210,23 +210,22 @@ def bold_keywords(line: str, keywords: set[str]) -> str:
 
 def refine_file(path: Path) -> None:
     lines = path.read_text(encoding="utf-8").splitlines()
-    body = lines[1:]
-    body = [line.replace("[", "").replace("]", "") for line in body]
-    english_lines = [line for line in body if is_english_line(line)]
+    normalized_lines = [
+        line.replace("[", "").replace("]", "").replace("**", "")
+        for line in lines
+    ]
+    english_lines = [line for line in normalized_lines if is_english_line(line)]
     keywords = choose_keywords(english_lines)
 
-    refined: list[str] = []
-    for line in body:
-        if is_english_line(line):
-            refined.append(bold_keywords(line, keywords))
-        else:
-            refined.append(line)
-
+    refined = [
+        bold_keywords(line, keywords) if is_english_line(line) else line
+        for line in normalized_lines
+    ]
     path.write_text("\n".join(refined).rstrip() + "\n", encoding="utf-8")
 
 
 def main() -> None:
-    for path in sorted(Path("text").glob("*.txt")):
+    for path in sorted(Path("texts").rglob("*.txt")):
         refine_file(path)
 
 

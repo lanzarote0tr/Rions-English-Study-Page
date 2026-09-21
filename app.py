@@ -1,9 +1,9 @@
+import logging
 import time
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from werkzeug.exceptions import HTTPException
-import logging
 
 from content import build_browse_payload, build_text_payload, normalize_study_mode
 
@@ -22,13 +22,36 @@ def _start_timer():
 
 
 @app.after_request
-def _log_request(response):
+def _prepare_response(response):
+    response.headers.setdefault(
+        "Content-Security-Policy",
+        "default-src 'self'; "
+        "base-uri 'self'; "
+        "connect-src 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none'; "
+        "img-src 'self'; "
+        "object-src 'none'; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline'",
+    )
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "same-origin")
+    response.headers.setdefault(
+        "Permissions-Policy",
+        "camera=(), geolocation=(), microphone=()",
+    )
+    if request.is_secure:
+        response.headers.setdefault(
+            "Strict-Transport-Security",
+            "max-age=31536000; includeSubDomains",
+        )
+
     duration_ms = int((time.monotonic() - request._start_time) * 1000)
     now = datetime.now(timezone.utc).strftime("%d/%b/%Y:%H:%M:%S +0000")
-    addr = request.headers.get("X-Forwarded-For", request.remote_addr)
     logger.info(
         '%s - - [%s] "%s %s %s" %d %s "%s" "%s" %dms',
-        addr,
+        request.remote_addr,
         now,
         request.method,
         request.full_path.rstrip("?"),
@@ -82,7 +105,7 @@ def study_page(text_path: str) -> str:
 
 @app.route("/practice/<path:text_path>")
 def legacy_practice_page(text_path: str):
-    return redirect(url_for("study_page", text_path=text_path), code=302)
+    return redirect(url_for("study_page", text_path=text_path, mode="practice"), code=302)
 
 
 @app.route("/fill/<path:text_path>")
@@ -107,4 +130,4 @@ def text_api(text_path: str):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)

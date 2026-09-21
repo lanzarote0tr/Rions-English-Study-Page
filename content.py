@@ -73,9 +73,9 @@ def build_breadcrumbs(subdirectory: str = "") -> tuple[list[dict[str, str]], str
 
 
 def normalize_study_mode(mode: str | None) -> str:
-    if mode in {"fill", "line"}:
+    if mode in {"notes", "practice", "fill", "line"}:
         return mode
-    return "practice"
+    return "notes"
 
 
 def contains_hangul(text: str) -> bool:
@@ -177,9 +177,9 @@ def load_text_payload(text_path: str) -> dict[str, object]:
 
     try:
         return dict(load_text_payload_from_file(text_path, path_signature(file_path)))
-    except OSError as exc:
+    except (OSError, UnicodeError) as exc:
         logger.error("failed to read file %r: %s", file_path, exc)
-        abort(500, f"Error reading file: {exc}")
+        abort(500, "Error reading file")
 
 
 def build_browse_payload(subdirectory: str = "", allow_missing: bool = False) -> dict[str, object]:

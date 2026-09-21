@@ -10,7 +10,7 @@
         previousPage: "englishStudyPreviousPage",
         previousStudyTextPath: "englishStudyPreviousStudyTextPath",
     };
-    const studyModeOrder = ["practice", "fill", "line"];
+    const studyModeOrder = ["notes", "practice", "fill", "line"];
     const normalizeStudyMode = window.EnglishStudy.text.normalizeStudyMode;
 
     function getStoredDarkMode() {
@@ -556,7 +556,7 @@
         if (link.matches(".study-mode-button.active")) {
             return;
         }
-        loadPage(link.href, { history: link.dataset.navigationHistory || "none", sourceLink: link });
+        loadPage(link.href, { history: link.dataset.navigationHistory || "push", sourceLink: link });
     });
 
     window.addEventListener("popstate", () => {
