@@ -16,9 +16,9 @@
                         <div class="navigation">
                             {% if browse["parent_path"] is not none %}
                                 {% if browse["parent_path"] %}
-                                <a class="back-button" href="{{ url_for('select_page', subdirectory=browse["parent_path"]) }}">&larr; 상위 폴더</a>
+                                <a class="btn back-button" href="{{ url_for('select_page', subdirectory=browse["parent_path"]) }}">&larr; 상위 폴더</a>
                                 {% else %}
-                                <a class="back-button" href="{{ url_for('select_page') }}">&larr; 홈으로</a>
+                                <a class="btn back-button" href="{{ url_for('select_page') }}">&larr; 홈으로</a>
                                 {% endif %}
                             {% endif %}
                             <div class="breadcrumbs">
@@ -30,44 +30,40 @@
                             </div>
                         </div>
                         <div class="select-theme-control">
-                            <span>다크모드</span>
-                            <label class="switch" aria-label="다크모드">
-                                <input type="checkbox" id="darkModeToggle">
-                                <span class="slider"></span>
-                            </label>
+                            <button type="button" class="btn btn-sm" id="themeButton" aria-haspopup="dialog">테마</button>
                         </div>
                     </div>
                     <div class="upload-panel">
-                        <button type="button" class="upload-toggle" id="openUpload" aria-haspopup="dialog" aria-controls="uploadDialog">업로드</button>
+                        <button type="button" class="btn upload-toggle" id="openUpload" aria-haspopup="dialog" aria-controls="uploadDialog">업로드</button>
                     </div>
-                    <dialog class="upload-dialog" id="uploadDialog" aria-labelledby="uploadTitle" aria-describedby="uploadDescription">
-                        <div class="format-guide-header">
+                    <dialog class="dialog dialog-wide upload-dialog" id="uploadDialog" aria-labelledby="uploadTitle" aria-describedby="uploadDescription">
+                        <div class="dialog-header">
                             <h2 id="uploadTitle">업로드</h2>
-                            <button type="button" class="format-guide-close" id="closeUpload" autofocus>닫기</button>
+                            <button type="button" class="btn btn-sm" id="closeUpload" autofocus>닫기</button>
                         </div>
-                        <div class="create-panel">
+                        <div class="dialog-body create-panel">
                             <p class="upload-description" id="uploadDescription">저장 위치: 홈{% for crumb in browse["breadcrumbs"] %} / {{ crumb["name"] }}{% endfor %}<br>만든 텍스트와 폴더는 이 브라우저에만 저장됩니다.</p>
                             <div class="upload-guide-row">
-                                <button type="button" class="guide-button" id="openFormatGuide">텍스트 양식 가이드</button>
+                                <button type="button" class="btn btn-sm" id="openFormatGuide">텍스트 양식 가이드</button>
                             </div>
                             <form class="create-form create-text-form" id="createTextForm">
-                                <input type="text" name="title" aria-label="텍스트 제목" autocomplete="off" maxlength="120" placeholder="새 텍스트 제목" required>
-                                <textarea name="content" aria-label="텍스트 내용" rows="6" placeholder="영어와 한국어 문장을 붙여넣기" required></textarea>
-                                <button type="submit" class="create-button primary">텍스트 만들기</button>
+                                <input type="text" class="field" name="title" aria-label="텍스트 제목" autocomplete="off" maxlength="120" placeholder="새 텍스트 제목" required>
+                                <textarea class="field" name="content" aria-label="텍스트 내용" rows="6" placeholder="영어와 한국어 문장을 붙여넣기" required></textarea>
+                                <button type="submit" class="btn btn-primary create-button">텍스트 만들기</button>
                             </form>
                             <form class="create-form create-folder-form" id="createFolderForm">
-                                <input type="text" name="name" aria-label="폴더 이름" autocomplete="off" maxlength="120" placeholder="새 폴더 이름" required>
-                                <button type="submit" class="create-button">폴더 만들기</button>
+                                <input type="text" class="field" name="name" aria-label="폴더 이름" autocomplete="off" maxlength="120" placeholder="새 폴더 이름" required>
+                                <button type="submit" class="btn create-button">폴더 만들기</button>
                             </form>
                             <p class="create-status" id="createStatus" aria-live="polite"></p>
                         </div>
                     </dialog>
-                    <dialog class="format-guide-modal" id="formatGuideModal" aria-labelledby="formatGuideTitle">
-                            <div class="format-guide-header">
+                    <dialog class="dialog dialog-wide format-guide-modal" id="formatGuideModal" aria-labelledby="formatGuideTitle">
+                            <div class="dialog-header">
                                 <h3 id="formatGuideTitle">텍스트 양식 가이드</h3>
-                                <button type="button" class="format-guide-close" id="closeFormatGuide">닫기</button>
+                                <button type="button" class="btn btn-sm" id="closeFormatGuide">닫기</button>
                             </div>
-                            <div class="format-guide-body">
+                            <div class="dialog-body format-guide-body">
                                 <section>
                                     <h4>1. 기본 작성법</h4>
                                     <p>영어 문장 한 줄, 그 문장에 맞는 한국어 해석 한 줄을 번갈아 작성합니다. 단어 채우기에서 빈칸으로 낼 단어는 영어 줄 안에서 <code>**단어**</code>처럼 감싸면 됩니다.</p>
@@ -88,10 +84,10 @@ The repair work will end next Friday.
                                     <h4>3. AI로 양식 만들기</h4>
                                     <p>아래 프롬프트의 입력란에 영어 본문과 한국어 해설을 넣어 AI에게 전달하세요. 받은 결과를 업로드 창에 붙여넣으면 됩니다.</p>
                                     <div class="format-prompt-actions">
-                                        <button type="button" class="guide-button" id="copyFormatPrompt">프롬프트 복사</button>
+                                        <button type="button" class="btn btn-sm" id="copyFormatPrompt">프롬프트 복사</button>
                                         <span class="format-copy-status" id="formatCopyStatus" role="status"></span>
                                     </div>
-                                    <textarea class="format-prompt" id="aiFormatPrompt" aria-label="AI에게 전달할 텍스트 양식 프롬프트" rows="10" readonly>아래 영어 본문과 한국어 해설을 영어 학습 앱에 넣을 텍스트로 정리해 줘.
+                                    <textarea class="field format-prompt" id="aiFormatPrompt" aria-label="AI에게 전달할 텍스트 양식 프롬프트" rows="10" readonly>아래 영어 본문과 한국어 해설을 영어 학습 앱에 넣을 텍스트로 정리해 줘.
 
 다음 규칙을 지켜 줘.
 1. 영어 본문을 문장 단위로 나누되, 단어·어순·철자·문장부호와 문장 순서는 그대로 유지해. 문장을 요약하거나 빠뜨리거나 새로 추가하지 마. 약어나 소수점 중간에서 문장을 나누지 마.
@@ -124,7 +120,7 @@ The repair work will end next Friday.
                                     <div class="file-item-container">
                                         <div class="file-title">{{ item["name"] }}</div>
                                         <div class="file-actions">
-                                            <a class="action-button study-button" href="{{ url_for('study_page', text_path=item["path"]) }}">
+                                            <a class="btn btn-primary action-button study-button" href="{{ url_for('study_page', text_path=item["path"]) }}">
                                                 <span>📚</span> 공부
                                             </a>
                                         </div>

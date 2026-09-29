@@ -10,7 +10,6 @@
     const saveSettings = core.settings.save;
     const normalizeStudyMode = core.text.normalizeStudyMode;
     const applyTheme = core.theme.apply;
-    const updateDarkModeToggle = core.theme.updateDarkModeToggle;
     const escapeHtml = core.html.escape;
     const parseLocalTextContent = core.local.parseTextContent;
 
@@ -195,6 +194,7 @@
 
             let cleanup = () => {};
             let persistCurrentMode = () => {};
+            let handleModeThemeChange = () => {};
             let completionNoticeTimer = null;
             let completionConfetti = null;
             const completionDismissEvents = ["keydown", "click", "pointermove"];
@@ -243,6 +243,20 @@
                 };
                 saveStudyProgress(state.progress);
                 return true;
+            }
+
+            function clearCompletionNotice(mode) {
+                const textProgress = getTextProgress();
+                if (!textProgress.completionNotices || !textProgress.completionNotices[mode]) {
+                    return;
+                }
+                const completionNotices = { ...textProgress.completionNotices };
+                delete completionNotices[mode];
+                state.progress[state.text.text_path] = {
+                    ...textProgress,
+                    completionNotices,
+                };
+                saveStudyProgress(state.progress);
             }
 
             function hideCompletionPopup() {
@@ -587,7 +601,7 @@
             }
 
             function handleCommonStudyShortcut(event) {
-                if (shortcutsDialog.open || studyMore.open
+                if (shortcutsDialog.open || studyMore.open || themePicker.isOpen()
                     || (event.target instanceof Element
                         && event.target.closest("button, a, summary, input[type='checkbox']")
                         && ["Enter", " ", "Tab"].includes(event.key))) {
@@ -618,8 +632,20 @@
             const studyMore = document.getElementById("studyMore");
             const studyMoreToggle = document.getElementById("studyMoreToggle");
             const studyShortcutsButton = document.getElementById("studyShortcutsButton");
+            const studyThemeButton = document.getElementById("studyThemeButton");
             const shortcutsDialog = document.getElementById("shortcutsDialog");
             const shortcutsClose = document.getElementById("shortcutsClose");
+            const themePicker = core.theme.createPicker({
+                container: document.getElementById("page-root"),
+                settings: state.settings,
+                onChange: () => handleModeThemeChange(),
+                onClose: restoreMenuFocus,
+            });
+
+            function openThemePicker() {
+                studyMore.open = false;
+                themePicker.open();
+            }
 
             function openShortcuts() {
                 studyMore.open = false;
@@ -663,6 +689,7 @@
             }
 
             studyShortcutsButton.addEventListener("click", openShortcuts);
+            studyThemeButton.addEventListener("click", openThemePicker);
             shortcutsClose.addEventListener("click", closeShortcuts);
             shortcutsDialog.addEventListener("click", handleShortcutsBackdrop);
             shortcutsDialog.addEventListener("close", restoreMenuFocus);
@@ -718,9 +745,6 @@
                     statusText,
                     textPath: state.text.text_path,
                     text: englishText,
-                    settings: state.settings,
-                    saveSettings,
-                    applyTheme,
                 });
                 const annotationShortcuts = {
                     u: "underline",
@@ -795,6 +819,7 @@
                 const cursor = document.getElementById("cursor");
 
                 switchContainer.innerHTML = `
+                    <button type="button" class="btn btn-sm" id="practiceResetButton">초기화</button>
                     ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글</label></div>' : ''}
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-visibility"><span class="slider"></span></label>
@@ -804,17 +829,20 @@
                         <label class="switch"><input type="checkbox" id="toggle-partial-preview"><span class="slider"></span></label>
                         <label for="toggle-partial-preview" class="switch-label">일부 미리보기</label>
                     </div>
-                    <div class="switch-group">
-                        <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
-                        <label for="darkModeToggle" class="switch-label">다크모드</label>
-                    </div>
                 `;
-                updateDarkModeToggle(state.settings);
 
                 const visibilityToggle = document.getElementById("toggle-visibility");
                 const partialPreviewToggle = document.getElementById("toggle-partial-preview");
-                const darkModeToggle = document.getElementById("darkModeToggle");
                 const koreanToggle = document.getElementById("toggle-korean");
+                const resetButton = document.getElementById("practiceResetButton");
+                const resetDialog = window.EnglishStudy.dialog.confirm({
+                    container: switchContainer,
+                    title: "글쓰기 초기화",
+                    description: "이 글에 입력한 내용을 모두 지우고 처음부터 다시 시작합니다. 지운 내용은 되돌릴 수 없습니다.",
+                    confirmLabel: "초기화",
+                    onConfirm: resetPractice,
+                    onClose: () => textDisplay.focus(),
+                });
 
                 visibilityToggle.checked = state.settings.practiceReveal;
                 partialPreviewToggle.checked = state.settings.practiceWordHint;
@@ -1061,11 +1089,37 @@
                     });
                 }
 
+                function updateResetButton() {
+                    resetButton.disabled = !typedCharacters.some((value) => value != null);
+                }
+
+                function requestReset() {
+                    if (resetButton.disabled) {
+                        return;
+                    }
+                    resetDialog.open();
+                }
+
+                function resetPractice() {
+                    characters.forEach((span, index) => {
+                        span.classList.remove("correct", "incorrect");
+                        span.textContent = englishText[index];
+                    });
+                    typedCharacters.length = 0;
+                    currentIndex = 0;
+                    skipAutoCharacters();
+                    clearCompletionNotice("practice");
+                    textDisplay.scrollTop = 0;
+                    refreshPracticeView();
+                    textDisplay.focus();
+                }
+
                 function refreshPracticeView() {
                     document.body.classList.toggle("hide-upcoming", !state.settings.practiceReveal);
                     updateStatus();
                     updateKoreanHighlight();
                     updateCursor(true);
+                    updateResetButton();
                     persistPracticeProgress();
                 }
 
@@ -1112,6 +1166,9 @@
                 }
 
                 function handleKeydown(event) {
+                    if (resetDialog.isOpen()) {
+                        return;
+                    }
                     if (handleCommonStudyShortcut(event)) {
                         return;
                     }
@@ -1221,12 +1278,6 @@
                     }, true);
                 }
 
-                function handleDarkModeChange() {
-                    state.settings.darkMode = darkModeToggle.checked;
-                    saveSettings(state.settings);
-                    applyTheme(state.settings);
-                }
-
                 if (state.settings.practiceReveal && state.settings.practiceWordHint) {
                     state.settings.practiceWordHint = false;
                     saveSettings(state.settings);
@@ -1234,7 +1285,7 @@
                 syncPracticePreviewToggles();
                 visibilityToggle.addEventListener("change", handleVisibilityChange);
                 partialPreviewToggle.addEventListener("change", handlePartialPreviewChange);
-                darkModeToggle.addEventListener("change", handleDarkModeChange);
+                resetButton.addEventListener("click", requestReset);
                 if (koreanToggle) {
                     koreanToggle.addEventListener("change", toggleKoreanVisibility);
                 }
@@ -1281,6 +1332,7 @@
                 }
                 skipAutoCharacters();
                 updateStatus();
+                updateResetButton();
                 updateKoreanHighlight();
                 if (state.koreanVisible) {
                     resetKoreanScroll(koreanWidget);
@@ -1301,7 +1353,8 @@
                     }
                     visibilityToggle.removeEventListener("change", handleVisibilityChange);
                     partialPreviewToggle.removeEventListener("change", handlePartialPreviewChange);
-                    darkModeToggle.removeEventListener("change", handleDarkModeChange);
+                    resetButton.removeEventListener("click", requestReset);
+                    resetDialog.destroy();
                     if (koreanToggle) {
                         koreanToggle.removeEventListener("change", toggleKoreanVisibility);
                     }
@@ -1324,6 +1377,7 @@
                 cursor.style.opacity = "0";
 
                 switchContainer.innerHTML = `
+                    <button type="button" class="btn btn-sm" id="fillResetButton">초기화</button>
                     ${koreanText ? '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글</label></div>' : ''}
                     <div class="switch-group">
                         <label class="switch"><input type="checkbox" id="toggle-preview"><span class="slider"></span></label>
@@ -1333,17 +1387,19 @@
                         <label class="switch"><input type="checkbox" id="toggle-first-letter"><span class="slider"></span></label>
                         <label for="toggle-first-letter" class="switch-label">앞글자만 보기</label>
                     </div>
-                    <div class="switch-group">
-                        <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
-                        <label for="darkModeToggle" class="switch-label">다크모드</label>
-                    </div>
                 `;
-                updateDarkModeToggle(state.settings);
 
                 const previewToggle = document.getElementById("toggle-preview");
                 const firstLetterToggle = document.getElementById("toggle-first-letter");
-                const darkModeToggle = document.getElementById("darkModeToggle");
                 const koreanToggle = document.getElementById("toggle-korean");
+                const resetButton = document.getElementById("fillResetButton");
+                const resetDialog = window.EnglishStudy.dialog.confirm({
+                    container: switchContainer,
+                    title: "단어 채우기 초기화",
+                    description: "이 글에 입력한 단어를 모두 지우고 처음부터 다시 시작합니다. 지운 내용은 되돌릴 수 없습니다.",
+                    confirmLabel: "초기화",
+                    onConfirm: resetBlanks,
+                });
                 const fillProgress = getTextProgress().fill || {};
 
                 previewToggle.checked = state.settings.fillPreview;
@@ -1445,6 +1501,31 @@
                     });
                 }
 
+                function updateResetButton() {
+                    resetButton.disabled = !blanks.some((input) => input.value);
+                }
+
+                function requestReset() {
+                    if (resetButton.disabled) {
+                        return;
+                    }
+                    resetDialog.open();
+                }
+
+                function resetBlanks() {
+                    blanks.forEach((input) => {
+                        input.value = "";
+                        input.classList.remove("correct", "incorrect");
+                    });
+                    clearCompletionNotice("fill");
+                    updateResetButton();
+                    if (blanks.length) {
+                        focusAndScroll(0);
+                    } else {
+                        persistFillProgress();
+                    }
+                }
+
                 function focusAndScroll(index) {
                     if (index >= 0 && index < blanks.length) {
                         currentBlankIndex = index;
@@ -1513,6 +1594,7 @@
                     input.classList.toggle("correct", value === answer);
                     input.classList.toggle("incorrect", Boolean(value) && value !== answer);
                     updateStatus();
+                    updateResetButton();
                     persistFillProgress();
                     checkFillCompletion();
                 }
@@ -1550,6 +1632,9 @@
                 }
 
                 function handleKeydown(event) {
+                    if (resetDialog.isOpen()) {
+                        return;
+                    }
                     if (handleCommonStudyShortcut(event)) {
                         return;
                     }
@@ -1641,12 +1726,6 @@
                     updatePreview();
                 }
 
-                function handleDarkModeChange() {
-                    state.settings.darkMode = darkModeToggle.checked;
-                    saveSettings(state.settings);
-                    applyTheme(state.settings);
-                }
-
                 renderText();
                 textDisplay.addEventListener("input", handleInput);
                 textDisplay.addEventListener("focusin", handleFocus);
@@ -1654,7 +1733,7 @@
 
                 previewToggle.addEventListener("change", handlePreviewChange);
                 firstLetterToggle.addEventListener("change", handleFirstLetterChange);
-                darkModeToggle.addEventListener("change", handleDarkModeChange);
+                resetButton.addEventListener("click", requestReset);
                 if (koreanToggle) {
                     koreanToggle.addEventListener("change", toggleKoreanVisibility);
                 }
@@ -1679,6 +1758,7 @@
                     });
                 }
                 updateStatus();
+                updateResetButton();
                 if (blanks.length) {
                     const savedBlankIndex = Number.isInteger(fillProgress.currentBlankIndex)
                         ? fillProgress.currentBlankIndex
@@ -1702,10 +1782,11 @@
                     textDisplay.removeEventListener("focusout", handleBlur);
                     previewToggle.removeEventListener("change", handlePreviewChange);
                     firstLetterToggle.removeEventListener("change", handleFirstLetterChange);
-                    darkModeToggle.removeEventListener("change", handleDarkModeChange);
                     if (koreanToggle) {
                         koreanToggle.removeEventListener("change", toggleKoreanVisibility);
                     }
+                    resetButton.removeEventListener("click", requestReset);
+                    resetDialog.destroy();
                     document.removeEventListener("keydown", handleKeydown);
                 };
                 persistCurrentMode = persistFillProgress;
@@ -1738,15 +1819,8 @@
 
                 cursor.style.opacity = "0";
                 koreanWidget.innerHTML = "";
-                switchContainer.innerHTML = `
-                    <div class="switch-group">
-                        <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
-                        <label for="darkModeToggle" class="switch-label">다크모드</label>
-                    </div>
-                `;
-                updateDarkModeToggle(state.settings);
+                switchContainer.innerHTML = "";
 
-                const darkModeToggle = document.getElementById("darkModeToggle");
                 const englishLines = Array.isArray(linePairs) && linePairs.length
                     ? linePairs.map((pair) => (pair.english || "").replace(/\*\*/g, ""))
                     : splitIntoSentences(englishText).sentences;
@@ -1917,15 +1991,12 @@
                     }
                 }
 
-                function handleDarkModeChange() {
-                    state.settings.darkMode = darkModeToggle.checked;
-                    saveSettings(state.settings);
-                    applyTheme(state.settings);
+                handleModeThemeChange = () => {
                     requestAnimationFrame(() => {
                         syncScenePadding();
                         updateCamera(false);
                     });
-                }
+                };
 
                 function handleTouchStart(event) {
                     if (!event.touches || event.touches.length !== 1) {
@@ -1987,7 +2058,7 @@
                 function handleWheel(event) {
                     // Trackpad pinch gestures should retain the browser's zoom behavior.
                     if (maxLineCount <= 1 || event.ctrlKey || event.metaKey
-                        || shortcutsDialog.open || studyMore.open) {
+                        || shortcutsDialog.open || studyMore.open || themePicker.isOpen()) {
                         return;
                     }
 
@@ -2041,7 +2112,6 @@
                 updateCardStates();
                 syncScenePadding();
                 updateCamera(false);
-                darkModeToggle.addEventListener("change", handleDarkModeChange);
                 // PJAX leaves the pointer over the clicked tab/link until it moves.
                 // Handle wheel input across the line-reading page, including the notice.
                 document.addEventListener("wheel", handleWheel, { passive: false });
@@ -2067,7 +2137,7 @@
                     if (resizeObserver) {
                         resizeObserver.disconnect();
                     }
-                    darkModeToggle.removeEventListener("change", handleDarkModeChange);
+                    handleModeThemeChange = () => {};
                     document.removeEventListener("wheel", handleWheel);
                     textDisplay.removeEventListener("touchstart", handleTouchStart);
                     textDisplay.removeEventListener("touchmove", handleTouchMove);
@@ -2080,7 +2150,6 @@
 
             function initializeStudyPage() {
                 applyTheme(state.settings);
-                updateDarkModeToggle(state.settings);
                 document.body.classList.toggle("line-mode-active", state.mode === "line");
 
                 if (state.mode === "notes") {
@@ -2111,6 +2180,8 @@
                 }
                 hideCompletionPopup();
                 studyShortcutsButton.removeEventListener("click", openShortcuts);
+                studyThemeButton.removeEventListener("click", openThemePicker);
+                themePicker.destroy();
                 shortcutsClose.removeEventListener("click", closeShortcuts);
                 shortcutsDialog.removeEventListener("click", handleShortcutsBackdrop);
                 shortcutsDialog.removeEventListener("close", restoreMenuFocus);

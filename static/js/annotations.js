@@ -79,9 +79,6 @@
             statusText,
             textPath,
             text,
-            settings,
-            saveSettings,
-            applyTheme,
         } = options;
         let annotations = loadAnnotations(textPath, text);
         let selectedRange = null;
@@ -91,52 +88,42 @@
 
         switchContainer.innerHTML = `
             <div class="annotation-toolbar" role="toolbar" aria-label="필기 도구">
-                <button type="button" class="annotation-tool annotation-tool-underline" data-annotation-action="underline" aria-keyshortcuts="U">밑줄 <kbd>U</kbd></button>
-                <button type="button" class="annotation-tool annotation-tool-highlight" data-annotation-action="highlight" aria-keyshortcuts="H">하이라이트 <kbd>H</kbd></button>
-                <button type="button" class="annotation-tool annotation-tool-box" data-annotation-action="box" aria-keyshortcuts="S">네모 치기 <kbd>S</kbd></button>
+                <button type="button" class="btn btn-sm annotation-tool-underline" data-annotation-action="underline" aria-keyshortcuts="U">밑줄 <kbd>U</kbd></button>
+                <button type="button" class="btn btn-sm annotation-tool-highlight" data-annotation-action="highlight" aria-keyshortcuts="H">하이라이트 <kbd>H</kbd></button>
+                <button type="button" class="btn btn-sm annotation-tool-box" data-annotation-action="box" aria-keyshortcuts="S">네모 치기 <kbd>S</kbd></button>
                 <span class="annotation-toolbar-divider" aria-hidden="true"></span>
-                <button type="button" class="annotation-tool annotation-tool-remove" data-annotation-action="remove" aria-keyshortcuts="D">선택 필기 지우기 <kbd>D</kbd></button>
-                <button type="button" class="annotation-tool annotation-tool-clear" data-annotation-action="clear" aria-keyshortcuts="Shift+D">전체 지우기 <kbd>Shift+D</kbd></button>
-                <div class="switch-group annotation-theme-control">
-                    <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
-                    <label for="darkModeToggle" class="switch-label">다크모드</label>
-                </div>
+                <button type="button" class="btn btn-sm" data-annotation-action="remove" aria-keyshortcuts="D">선택 필기 지우기 <kbd>D</kbd></button>
+                <button type="button" class="btn btn-sm" data-annotation-action="clear" aria-keyshortcuts="Shift+D">전체 지우기 <kbd>Shift+D</kbd></button>
             </div>
-            <dialog class="annotation-note-dialog" id="annotationNoteDialog" aria-labelledby="annotationNoteTitle">
-                <form class="annotation-note-form" id="annotationNoteForm">
+            <dialog class="dialog" id="annotationNoteDialog" aria-labelledby="annotationNoteTitle">
+                <div class="dialog-header">
                     <h2 id="annotationNoteTitle">작은 메모</h2>
+                </div>
+                <form class="dialog-body" id="annotationNoteForm">
                     <p>밑줄이나 네모 친 부분 아래에 같은 색으로 표시됩니다.</p>
-                    <input type="text" id="annotationNoteInput" maxlength="160" autocomplete="off" aria-label="필기 메모">
-                    <div class="annotation-note-actions">
-                        <button type="button" id="annotationNoteDelete">메모 삭제</button>
-                        <button type="button" id="annotationNoteClose">닫기</button>
-                        <button type="submit" class="primary">저장</button>
+                    <input type="text" class="field" id="annotationNoteInput" maxlength="160" autocomplete="off" aria-label="필기 메모">
+                    <div class="dialog-actions">
+                        <button type="button" class="btn" id="annotationNoteDelete">메모 삭제</button>
+                        <button type="button" class="btn" id="annotationNoteClose">닫기</button>
+                        <button type="submit" class="btn btn-primary">저장</button>
                     </div>
                 </form>
-            </dialog>
-            <dialog class="annotation-note-dialog annotation-clear-dialog" id="annotationClearDialog" aria-labelledby="annotationClearTitle">
-                <div class="annotation-note-form">
-                    <h2 id="annotationClearTitle">전체 필기 지우기</h2>
-                    <p>이 글의 밑줄, 하이라이트, 네모와 메모를 모두 삭제합니다. 삭제한 필기는 되돌릴 수 없습니다.</p>
-                    <div class="annotation-note-actions">
-                        <button type="button" id="annotationClearCancel">취소</button>
-                        <button type="button" class="danger" id="annotationClearConfirm">전체 지우기</button>
-                    </div>
-                </div>
             </dialog>
         `;
 
         const toolbar = switchContainer.querySelector(".annotation-toolbar");
-        const darkModeToggle = switchContainer.querySelector("#darkModeToggle");
         const noteDialog = switchContainer.querySelector("#annotationNoteDialog");
         const noteForm = switchContainer.querySelector("#annotationNoteForm");
         const noteInput = switchContainer.querySelector("#annotationNoteInput");
         const noteDelete = switchContainer.querySelector("#annotationNoteDelete");
         const noteClose = switchContainer.querySelector("#annotationNoteClose");
-        const clearDialog = switchContainer.querySelector("#annotationClearDialog");
-        const clearCancel = switchContainer.querySelector("#annotationClearCancel");
-        const clearConfirm = switchContainer.querySelector("#annotationClearConfirm");
-        darkModeToggle.checked = Boolean(settings.darkMode);
+        const clearDialog = window.EnglishStudy.dialog.confirm({
+            container: switchContainer,
+            title: "전체 필기 지우기",
+            description: "이 글의 밑줄, 하이라이트, 네모와 메모를 모두 삭제합니다. 삭제한 필기는 되돌릴 수 없습니다.",
+            confirmLabel: "전체 지우기",
+            onConfirm: clearAllAnnotations,
+        });
 
         function setStatus(message) {
             statusText.textContent = message;
@@ -333,14 +320,8 @@
             }
         }
 
-        function closeClearDialog() {
-            if (clearDialog.open) {
-                clearDialog.close();
-            }
-        }
-
         function hasOpenDialog() {
-            return noteDialog.open || clearDialog.open;
+            return noteDialog.open || clearDialog.isOpen();
         }
 
         function applyAnnotation(type) {
@@ -399,10 +380,7 @@
                 return;
             }
             clearSelection();
-            if (!clearDialog.open) {
-                clearDialog.showModal();
-            }
-            window.requestAnimationFrame(() => clearCancel.focus());
+            clearDialog.open();
         }
 
         function clearAllAnnotations() {
@@ -410,7 +388,6 @@
             persistAnnotations();
             renderText();
             clearSelection();
-            closeClearDialog();
             setStatus("이 글의 필기를 모두 지웠습니다.");
         }
 
@@ -477,12 +454,6 @@
             setStatus("메모를 삭제했습니다.");
         }
 
-        function handleDarkModeChange() {
-            settings.darkMode = darkModeToggle.checked;
-            saveSettings(settings);
-            applyTheme(settings);
-        }
-
         renderText();
         setStatus("본문에서 필기할 부분을 선택한 뒤 버튼이나 U/H/S 키를 누르세요.");
         document.addEventListener("selectionchange", captureSelection);
@@ -492,9 +463,6 @@
         noteForm.addEventListener("submit", handleNoteSubmit);
         noteDelete.addEventListener("click", handleNoteDelete);
         noteClose.addEventListener("click", closeNoteEditor);
-        clearCancel.addEventListener("click", closeClearDialog);
-        clearConfirm.addEventListener("click", clearAllAnnotations);
-        darkModeToggle.addEventListener("change", handleDarkModeChange);
         window.addEventListener("resize", scheduleNotePosition);
         if ("ResizeObserver" in window) {
             noteResizeObserver = new ResizeObserver(scheduleNotePosition);
@@ -515,9 +483,6 @@
                 noteForm.removeEventListener("submit", handleNoteSubmit);
                 noteDelete.removeEventListener("click", handleNoteDelete);
                 noteClose.removeEventListener("click", closeNoteEditor);
-                clearCancel.removeEventListener("click", closeClearDialog);
-                clearConfirm.removeEventListener("click", clearAllAnnotations);
-                darkModeToggle.removeEventListener("change", handleDarkModeChange);
                 window.removeEventListener("resize", scheduleNotePosition);
                 if (noteResizeObserver) {
                     noteResizeObserver.disconnect();
@@ -526,7 +491,7 @@
                     window.cancelAnimationFrame(notePositionFrame);
                 }
                 closeNoteEditor();
-                closeClearDialog();
+                clearDialog.destroy();
             },
         };
     }

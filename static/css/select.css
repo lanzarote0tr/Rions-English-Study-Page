@@ -23,7 +23,6 @@ body.page-select {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: color-mix(in srgb, var(--surface-color) 92%, var(--bg-color));
 }
 
 .title-wrapper {
@@ -35,10 +34,6 @@ body.page-select {
 .site-title {
     position: relative;
     justify-self: start;
-    color: var(--text-color);
-    font-size: var(--app-header-title-size);
-    font-weight: 700;
-    line-height: var(--app-header-title-line-height);
     text-align: left;
 }
 
@@ -153,24 +148,7 @@ body.page-select {
 }
 
 .back-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     flex: 0 0 auto;
-    min-height: 34px;
-    padding: 0 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    color: var(--text-color-light);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.back-button:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-    background: var(--accent-soft);
 }
 
 .breadcrumbs {
@@ -212,14 +190,9 @@ body.page-select {
     display: inline-flex;
     align-items: center;
     flex: 0 0 auto;
-    gap: 10px;
     min-height: 34px;
     padding-left: 16px;
     border-left: 1px solid var(--border-color);
-    color: var(--text-color-light);
-    font-size: 0.86rem;
-    font-weight: 600;
-    white-space: nowrap;
 }
 
 .upload-panel {
@@ -231,41 +204,15 @@ body.page-select {
     transition: opacity var(--page-transition-fast) ease, transform var(--page-transition-fast) var(--page-transition-ease);
 }
 
-.upload-toggle {
-    display: inline-flex;
-    align-items: center;
-    min-height: 34px;
-    padding: 0;
-    color: var(--accent-color);
-    cursor: pointer;
-    font-size: 0.92rem;
-    font-weight: 700;
-    transition: color 0.2s ease;
-}
-
 .upload-toggle::before {
-    width: 24px;
-    margin-right: 8px;
-    color: var(--accent-color);
     content: "+";
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 400;
     line-height: 1;
-    text-align: center;
-}
-
-.upload-toggle:hover {
-    color: var(--accent-hover);
 }
 
 .create-panel {
-    display: flex;
-    flex-direction: column;
     gap: 18px;
-    min-height: 0;
-    padding: 22px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
 }
 
 .upload-description {
@@ -279,21 +226,6 @@ body.page-select {
 .upload-guide-row {
     display: flex;
     justify-content: flex-end;
-}
-
-.guide-button {
-    min-height: 30px;
-    padding: 0 8px;
-    border-radius: 8px;
-    color: var(--text-color-light);
-    cursor: pointer;
-    font-size: 0.82rem;
-    transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.guide-button:hover {
-    color: var(--accent-color);
-    background: var(--surface-muted);
 }
 
 .create-form {
@@ -315,71 +247,20 @@ body.page-select {
     border-top: 1px solid var(--border-color);
 }
 
-.create-form input,
-.create-form textarea {
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    outline: none;
-    color: var(--text-color);
-    background: var(--surface-soft);
-    font: inherit;
-    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.create-form input {
+.create-form input.field {
     height: 40px;
-    padding: 0 12px;
 }
 
-.create-form textarea {
+.create-form textarea.field {
     min-height: 150px;
     max-height: 300px;
-    padding: 10px 12px;
-    resize: vertical;
-    line-height: 1.55;
-}
-
-.create-form input:focus,
-.create-form textarea:focus {
-    border-color: var(--accent-color);
-    background: var(--surface-color);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 12%, transparent);
 }
 
 .create-button {
     flex: 0 0 auto;
     min-width: 98px;
-    height: 40px;
-    padding: 0 13px;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    color: var(--text-color);
-    background: var(--surface-muted);
-    cursor: pointer;
+    min-height: 40px;
     font-size: 0.86rem;
-    font-weight: 700;
-    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.create-button.primary {
-    border-color: var(--accent-color);
-    color: var(--accent-text);
-    background: var(--accent-color);
-}
-
-.create-button:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-    transform: translateY(-1px);
-}
-
-.create-button.primary:hover {
-    border-color: var(--accent-hover);
-    color: var(--accent-text);
-    background: var(--accent-hover);
 }
 
 .create-form.submitting {
@@ -515,32 +396,10 @@ body.page-select {
 }
 
 .action-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex: 1 1 auto;
     gap: 7px;
     min-height: 38px;
-    padding: 0 13px;
-    border-radius: 10px;
-    color: var(--accent-text);
-    text-decoration: none;
     font-size: 0.86rem;
-    font-weight: 700;
-    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-}
-
-.action-button:hover {
-    transform: translateY(-1px);
-}
-
-.study-button {
-    background: var(--accent-color);
-}
-
-.study-button:hover {
-    color: var(--accent-text);
-    background: var(--accent-hover);
 }
 
 .delete-local-button {
@@ -693,80 +552,8 @@ body.page-select {
     transform: translateY(0) scale(1);
 }
 
-.upload-dialog[open],
-.format-guide-modal[open] {
-    display: flex;
-    flex-direction: column;
-    animation: select-dialog-reveal var(--motion-ui) var(--page-transition-ease);
-}
-
-.upload-dialog,
-.format-guide-modal {
-    width: min(640px, calc(100vw - 32px));
-    max-height: calc(100dvh - 32px);
-    margin: auto;
-    padding: 0;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    color: var(--text-color);
-    background: var(--surface-color);
-    box-shadow: 0 18px 60px var(--shadow-strong);
-}
-
-.upload-dialog::backdrop,
-.format-guide-modal::backdrop {
-    background: rgb(0 0 0 / 22%);
-}
-
-@keyframes select-dialog-reveal {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.format-guide-header {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.format-guide-header h2,
-.format-guide-header h3 {
-    margin: 0;
-    font-size: 1.08rem;
-}
-
-.format-guide-close {
-    flex: 0 0 auto;
-    min-height: 34px;
-    padding: 0 11px;
-    border-radius: 9px;
-    color: var(--text-color-light);
-    background: var(--surface-muted);
-    cursor: pointer;
-    font-size: 0.82rem;
-    font-weight: 700;
-    transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.format-guide-close:hover {
-    color: var(--accent-color);
-    background: var(--accent-soft);
-}
-
 .format-guide-body {
-    min-height: 0;
-    padding: 20px 22px 24px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-}
-
-.format-guide-body section + section {
-    margin-top: 22px;
+    gap: 22px;
 }
 
 .format-prompt-actions {
@@ -784,19 +571,12 @@ body.page-select {
 
 .format-prompt {
     display: block;
-    width: 100%;
     min-height: 200px;
     max-height: 400px;
     margin-bottom: 12px;
     padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-color);
-    background: var(--surface-soft);
-    font-family: inherit;
     font-size: 0.84rem;
     line-height: 1.7;
-    resize: vertical;
 }
 
 .format-guide-body h4 {
@@ -907,12 +687,5 @@ body.page-select {
         right: 0;
         max-width: calc(100vw - 28px);
         white-space: normal;
-    }
-
-    .create-panel,
-    .format-guide-header,
-    .format-guide-body {
-        padding-right: 16px;
-        padding-left: 16px;
     }
 }

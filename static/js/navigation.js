@@ -17,23 +17,8 @@
         return sourceDocument.querySelector('meta[name="app-assets-version"]')?.content || "";
     }
 
-    function getStoredDarkMode() {
-        return Boolean(window.EnglishStudy.settings.load().darkMode);
-    }
-
-    function getThemedBodyClassName(className) {
-        const classes = new Set(String(className || "").split(/\s+/).filter(Boolean));
-        classes.delete("dark-mode");
-        if (getStoredDarkMode()) {
-            classes.add("dark-mode");
-        }
-        return [...classes].join(" ");
-    }
-
-    function syncStoredThemeControls() {
-        window.EnglishStudy.theme.updateDarkModeToggle({
-            darkMode: getStoredDarkMode(),
-        });
+    function applyStoredTheme() {
+        window.EnglishStudy.theme.apply(window.EnglishStudy.settings.load());
     }
 
     function isSameOrigin(url) {
@@ -130,10 +115,9 @@
         }
 
         document.title = nextDocument.title;
-        document.body.className = getThemedBodyClassName(nextDocument.body.className);
+        document.body.className = nextDocument.body.className;
         document.body.dataset.page = nextDocument.body.dataset.page || "";
-        document.documentElement.classList.toggle("dark-mode", getStoredDarkMode());
-        syncStoredThemeControls();
+        applyStoredTheme();
         currentRoot.replaceWith(nextRoot);
         return nextRoot;
     }
@@ -204,10 +188,9 @@
         }
 
         document.title = nextDocument.title;
-        document.body.className = getThemedBodyClassName(nextDocument.body.className);
+        document.body.className = nextDocument.body.className;
         document.body.dataset.page = nextDocument.body.dataset.page || "";
-        document.documentElement.classList.toggle("dark-mode", getStoredDarkMode());
-        syncStoredThemeControls();
+        applyStoredTheme();
         currentRoot.dataset.currentPath = nextRoot.dataset.currentPath || "";
 
         currentContainer.classList.add("is-menu-transitioning");

@@ -2,7 +2,6 @@
     const core = window.EnglishStudy;
     const localTextPrefix = core.local.prefix;
     const loadSettings = core.settings.load;
-    const saveSettings = core.settings.save;
     const loadLocalLibrary = core.local.loadLibrary;
     const saveLocalLibrary = core.local.saveLibrary;
     const normalizePath = core.path.normalize;
@@ -11,10 +10,7 @@
     const sanitizeSegment = core.path.sanitizeSegment;
     const normalizeTextTitle = core.path.normalizeTextTitle;
     const escapeHtml = core.html.escape;
-    const applyTheme = (settings) => {
-        core.theme.apply(settings);
-        core.theme.updateDarkModeToggle(settings);
-    };
+    const applyTheme = core.theme.apply;
     const hasLocalNameConflict = core.local.hasNameConflict;
     const removeLocalFolder = core.local.removeFolder;
 
@@ -56,7 +52,7 @@
                 <div class="file-item-container local-file-item">
                     <div class="file-title">${escapeHtml(text.name)}</div>
                     <div class="file-actions">
-                        <a class="action-button study-button" href="/study/${localTextPrefix}${encodePath(text.path)}">
+                        <a class="btn btn-primary action-button study-button" href="/study/${localTextPrefix}${encodePath(text.path)}">
                             <span>📚</span> 공부
                         </a>
                         <button type="button" class="delete-local-button" data-local-delete="text" data-local-path="${escapeHtml(text.path)}">삭제</button>
@@ -76,10 +72,17 @@
             }
 
             const settings = loadSettings();
-            const darkModeToggle = document.getElementById("darkModeToggle");
+            const pageRoot = document.getElementById("page-root");
+            const themeButton = document.getElementById("themeButton");
+            const themePicker = themeButton && pageRoot
+                ? core.theme.createPicker({
+                    container: pageRoot,
+                    settings,
+                    onClose: () => themeButton.focus({ preventScroll: true }),
+                })
+                : null;
             const profilePic = document.getElementById("profilePic");
             const profileInfo = document.getElementById("profileInfo");
-            const pageRoot = document.getElementById("page-root");
             const createFolderForm = document.getElementById("createFolderForm");
             const createTextForm = document.getElementById("createTextForm");
             const createStatus = document.getElementById("createStatus");
@@ -108,10 +111,8 @@
                 }
             }
 
-            function handleDarkModeChange() {
-                settings.darkMode = darkModeToggle.checked;
-                saveSettings(settings);
-                applyTheme(settings);
+            function openThemePicker() {
+                themePicker.open();
             }
 
             function setCreateStatus(message, tone = "") {
@@ -275,8 +276,8 @@
                 }
             }
 
-            if (darkModeToggle) {
-                darkModeToggle.addEventListener("change", handleDarkModeChange);
+            if (themePicker) {
+                themeButton.addEventListener("click", openThemePicker);
             }
             if (profilePic && profileInfo) {
                 profilePic.addEventListener("click", toggleProfile);
@@ -312,8 +313,9 @@
             document.addEventListener("click", handleDeleteLocalItem);
 
             return () => {
-                if (darkModeToggle) {
-                    darkModeToggle.removeEventListener("change", handleDarkModeChange);
+                if (themePicker) {
+                    themeButton.removeEventListener("click", openThemePicker);
+                    themePicker.destroy();
                 }
                 if (profilePic && profileInfo) {
                     profilePic.removeEventListener("click", toggleProfile);
