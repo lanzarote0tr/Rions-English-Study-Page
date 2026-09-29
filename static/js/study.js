@@ -531,6 +531,13 @@
                 document.body.classList.toggle("korean-visible", Boolean(hasKorean && state.koreanVisible));
             }
 
+            function resetKoreanScroll(koreanWidget) {
+                koreanWidget.scrollTop = 0;
+                window.requestAnimationFrame(() => {
+                    koreanWidget.scrollTo({ top: 0, behavior: "auto" });
+                });
+            }
+
             function getLinkHref(id) {
                 const link = document.getElementById(id);
                 return link ? link.href : null;
@@ -715,12 +722,41 @@
                     saveSettings,
                     applyTheme,
                 });
+                const annotationShortcuts = {
+                    u: "underline",
+                    h: "highlight",
+                    s: "box",
+                };
 
                 function handleKeydown(event) {
-                    if (annotationController.noteDialog.open) {
+                    if (annotationController.hasOpenDialog()) {
                         return;
                     }
                     if (handleCommonStudyShortcut(event)) {
+                        return;
+                    }
+                    const target = event.target;
+                    const isTyping = target instanceof HTMLElement
+                        && (target.matches("input, textarea, select") || target.isContentEditable);
+                    const key = event.key.toLowerCase();
+                    const acceptsAnnotationShortcut = !event.ctrlKey
+                        && !event.metaKey
+                        && !event.altKey
+                        && !event.repeat
+                        && !isTyping;
+                    if (key === "d" && acceptsAnnotationShortcut) {
+                        event.preventDefault();
+                        if (event.shiftKey) {
+                            annotationController.requestClearAllAnnotations();
+                        } else {
+                            annotationController.removeSelectedAnnotations();
+                        }
+                        return;
+                    }
+                    const annotationType = annotationShortcuts[key];
+                    if (annotationType && acceptsAnnotationShortcut && !event.shiftKey) {
+                        event.preventDefault();
+                        annotationController.applyAnnotation(annotationType);
                         return;
                     }
                     if (event.shiftKey && event.key.toLowerCase() === "e") {
@@ -841,6 +877,9 @@
                     state.koreanVisible = !state.koreanVisible;
                     applyKoreanVisibility(koreanText);
                     updateKoreanToggle();
+                    if (state.koreanVisible) {
+                        resetKoreanScroll(koreanWidget);
+                    }
                     scheduleCursorUpdate();
                     persistPracticeProgress();
                 }
@@ -1243,6 +1282,9 @@
                 skipAutoCharacters();
                 updateStatus();
                 updateKoreanHighlight();
+                if (state.koreanVisible) {
+                    resetKoreanScroll(koreanWidget);
+                }
                 updateCursor(false);
                 scheduleCursorUpdate();
                 if (!isModeTransitioning()) {
@@ -1343,11 +1385,14 @@
                     state.koreanVisible = !state.koreanVisible;
                     applyKoreanVisibility(koreanText);
                     updateKoreanToggle();
-                    updateKoreanHighlight();
+                    updateKoreanHighlight(false);
+                    if (state.koreanVisible) {
+                        resetKoreanScroll(koreanWidget);
+                    }
                     persistFillProgress();
                 }
 
-                function updateKoreanHighlight() {
+                function updateKoreanHighlight(shouldScroll = true) {
                     if (!koreanSentences.length || currentBlankIndex < 0 || currentBlankIndex >= blanks.length) {
                         return;
                     }
@@ -1367,7 +1412,7 @@
                         span.classList.toggle("highlight", index === korIndex);
                     });
 
-                    if (document.body.classList.contains("korean-visible")) {
+                    if (shouldScroll && document.body.classList.contains("korean-visible")) {
                         koreanSentences[korIndex].scrollIntoView({ behavior: "smooth", block: "center" });
                     }
                 }
@@ -1645,6 +1690,9 @@
                     } else {
                         focusAndScroll(currentBlankIndex);
                     }
+                }
+                if (state.koreanVisible) {
+                    resetKoreanScroll(koreanWidget);
                 }
 
                 cleanup = () => {

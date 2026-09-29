@@ -13,6 +13,10 @@
     const studyModeOrder = ["notes", "practice", "fill", "line"];
     const normalizeStudyMode = window.EnglishStudy.text.normalizeStudyMode;
 
+    function readAssetVersion(sourceDocument) {
+        return sourceDocument.querySelector('meta[name="app-assets-version"]')?.content || "";
+    }
+
     function getStoredDarkMode() {
         return Boolean(window.EnglishStudy.settings.load().darkMode);
     }
@@ -476,6 +480,12 @@
 
             const nextDocument = new DOMParser().parseFromString(html, "text/html");
             const finalUrl = response.url || targetUrl.href;
+            const currentAssetVersion = readAssetVersion(document);
+            const nextAssetVersion = readAssetVersion(nextDocument);
+            if (currentAssetVersion && nextAssetVersion && currentAssetVersion !== nextAssetVersion) {
+                window.location.assign(finalUrl);
+                return;
+            }
             // Fetch ahead, but never replace the DOM halfway through another transition.
             const previousTransition = pendingTransition;
             pendingTransition = new Promise((resolve) => { releaseTransition = resolve; });

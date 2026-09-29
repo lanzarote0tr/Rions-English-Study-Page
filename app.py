@@ -1,6 +1,7 @@
 import logging
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from werkzeug.exceptions import HTTPException
@@ -14,6 +15,33 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+STATIC_ASSET_FILES = (
+    "css/base.css",
+    "css/select.css",
+    "css/study.css",
+    "js/theme-init.js",
+    "js/core.js",
+    "js/select.js",
+    "js/annotations.js",
+    "js/study.js",
+    "js/navigation.js",
+    "img/rion.png",
+)
+
+
+@app.context_processor
+def _inject_static_assets():
+    static_root = Path(app.static_folder)
+    version = max((static_root / filename).stat().st_mtime_ns for filename in STATIC_ASSET_FILES)
+
+    def static_asset(filename: str) -> str:
+        return url_for("static", filename=filename, v=version)
+
+    return {
+        "static_asset": static_asset,
+        "static_asset_version": version,
+    }
 
 
 @app.before_request

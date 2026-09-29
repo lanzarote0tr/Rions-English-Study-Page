@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="app-assets-version" content="{{ static_asset_version }}">
     <title>{% block title %}Rion's English Study Page{% endblock %}</title>
-    <script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/select.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/study.css') }}">
+    <script src="{{ static_asset('js/theme-init.js') }}"></script>
+    <link rel="stylesheet" href="{{ static_asset('css/base.css') }}">
+    <link rel="stylesheet" href="{{ static_asset('css/select.css') }}">
+    <link rel="stylesheet" href="{{ static_asset('css/study.css') }}">
 </head>
 <body class="{% block body_class %}{% endblock %}" data-page="{% block page_key %}{% endblock %}">
     {% block body %}{% endblock %}
-    <script src="{{ url_for('static', filename='js/core.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/select.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/annotations.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/study.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+    <script src="{{ static_asset('js/core.js') }}"></script>
+    <script src="{{ static_asset('js/select.js') }}"></script>
+    <script src="{{ static_asset('js/annotations.js') }}"></script>
+    <script src="{{ static_asset('js/study.js') }}"></script>
+    <script src="{{ static_asset('js/navigation.js') }}"></script>
 </body>
 </html>

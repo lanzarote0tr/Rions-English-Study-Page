@@ -36,14 +36,14 @@
                             <div class="navigation-buttons">
                                 <div class="nav-side nav-side-previous{% if not text["previous_text_path"] %} nav-side-empty{% endif %}">
                                 {% if text["previous_text_path"] %}
-                                <a class="nav-button" id="previousTextLink" href="{{ url_for('study_page', text_path=text["previous_text_path"], mode=mode if mode != 'notes' else None) }}">&laquo; 이전 글</a>
+                                <a class="nav-button" id="previousTextLink" href="{{ url_for('study_page', text_path=text["previous_text_path"], mode=mode if mode != 'notes' else None) }}" aria-label="이전 글"><span class="nav-label-long">&laquo; 이전 글</span><span class="nav-label-short" aria-hidden="true">&laquo;</span></a>
                                 {% else %}
                                 <span class="nav-button-placeholder" aria-hidden="true"></span>
                                 {% endif %}
                                 </div>
                                 <div class="nav-side nav-side-next{% if not text["next_text_path"] %} nav-side-empty{% endif %}">
                                 {% if text["next_text_path"] %}
-                                <a class="nav-button" id="nextTextLink" href="{{ url_for('study_page', text_path=text["next_text_path"], mode=mode if mode != 'notes' else None) }}">다음 글 &raquo;</a>
+                                <a class="nav-button" id="nextTextLink" href="{{ url_for('study_page', text_path=text["next_text_path"], mode=mode if mode != 'notes' else None) }}" aria-label="다음 글"><span class="nav-label-long">다음 글 &raquo;</span><span class="nav-label-short" aria-hidden="true">&raquo;</span></a>
                                 {% else %}
                                 <span class="nav-button-placeholder" aria-hidden="true"></span>
                                 {% endif %}
@@ -78,6 +78,16 @@
                         <div><dt>전체화면 전환</dt><dd><kbd>Shift</kbd> + <kbd>F</kbd></dd></div>
                         <div><dt>이전 / 다음 글</dt><dd><kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd></dd></div>
                         <div><dt>이전 / 다음 학습 모드</dt><dd><kbd>Shift</kbd> + <kbd>,</kbd> / <kbd>.</kbd></dd></div>
+                    </dl>
+                </section>
+                <section class="shortcuts-group" aria-labelledby="shortcutsNotesTitle">
+                    <h3 id="shortcutsNotesTitle">필기</h3>
+                    <dl>
+                        <div><dt>밑줄</dt><dd><kbd>U</kbd></dd></div>
+                        <div><dt>하이라이트</dt><dd><kbd>H</kbd></dd></div>
+                        <div><dt>네모 치기</dt><dd><kbd>S</kbd></dd></div>
+                        <div><dt>선택 필기 지우기</dt><dd><kbd>D</kbd></dd></div>
+                        <div><dt>전체 필기 지우기</dt><dd><kbd>Shift</kbd> + <kbd>D</kbd></dd></div>
                     </dl>
                 </section>
                 <section class="shortcuts-group" aria-labelledby="shortcutsPracticeTitle">

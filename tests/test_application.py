@@ -31,6 +31,14 @@ class ApplicationContractTests(unittest.TestCase):
             "camera=(), geolocation=(), microphone=()",
         )
 
+    def test_static_assets_are_versioned_for_browser_cache_refresh(self) -> None:
+        response = self.client.get("/")
+        html = response.get_data(as_text=True)
+
+        self.assertRegex(html, r'<meta name="app-assets-version" content="\d+">')
+        self.assertRegex(html, r'/static/css/study\.css\?v=\d+')
+        self.assertRegex(html, r'/static/js/navigation\.js\?v=\d+')
+
     def test_notes_is_the_default_study_mode(self) -> None:
         self.assertEqual(normalize_study_mode(None), "notes")
         self.assertEqual(normalize_study_mode("unknown"), "notes")

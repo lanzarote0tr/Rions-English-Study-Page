@@ -91,12 +91,12 @@
 
         switchContainer.innerHTML = `
             <div class="annotation-toolbar" role="toolbar" aria-label="필기 도구">
-                <button type="button" class="annotation-tool annotation-tool-underline" data-annotation-action="underline">빨간 밑줄</button>
-                <button type="button" class="annotation-tool annotation-tool-highlight" data-annotation-action="highlight">노란 하이라이트</button>
-                <button type="button" class="annotation-tool annotation-tool-box" data-annotation-action="box">네모 치기</button>
+                <button type="button" class="annotation-tool annotation-tool-underline" data-annotation-action="underline" aria-keyshortcuts="U">밑줄 <kbd>U</kbd></button>
+                <button type="button" class="annotation-tool annotation-tool-highlight" data-annotation-action="highlight" aria-keyshortcuts="H">하이라이트 <kbd>H</kbd></button>
+                <button type="button" class="annotation-tool annotation-tool-box" data-annotation-action="box" aria-keyshortcuts="S">네모 치기 <kbd>S</kbd></button>
                 <span class="annotation-toolbar-divider" aria-hidden="true"></span>
-                <button type="button" class="annotation-tool annotation-tool-remove" data-annotation-action="remove">선택 필기 지우기</button>
-                <button type="button" class="annotation-tool annotation-tool-clear" data-annotation-action="clear">전체 지우기</button>
+                <button type="button" class="annotation-tool annotation-tool-remove" data-annotation-action="remove" aria-keyshortcuts="D">선택 필기 지우기 <kbd>D</kbd></button>
+                <button type="button" class="annotation-tool annotation-tool-clear" data-annotation-action="clear" aria-keyshortcuts="Shift+D">전체 지우기 <kbd>Shift+D</kbd></button>
                 <div class="switch-group annotation-theme-control">
                     <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
                     <label for="darkModeToggle" class="switch-label">다크모드</label>
@@ -114,6 +114,16 @@
                     </div>
                 </form>
             </dialog>
+            <dialog class="annotation-note-dialog annotation-clear-dialog" id="annotationClearDialog" aria-labelledby="annotationClearTitle">
+                <div class="annotation-note-form">
+                    <h2 id="annotationClearTitle">전체 필기 지우기</h2>
+                    <p>이 글의 밑줄, 하이라이트, 네모와 메모를 모두 삭제합니다. 삭제한 필기는 되돌릴 수 없습니다.</p>
+                    <div class="annotation-note-actions">
+                        <button type="button" id="annotationClearCancel">취소</button>
+                        <button type="button" class="danger" id="annotationClearConfirm">전체 지우기</button>
+                    </div>
+                </div>
+            </dialog>
         `;
 
         const toolbar = switchContainer.querySelector(".annotation-toolbar");
@@ -123,6 +133,9 @@
         const noteInput = switchContainer.querySelector("#annotationNoteInput");
         const noteDelete = switchContainer.querySelector("#annotationNoteDelete");
         const noteClose = switchContainer.querySelector("#annotationNoteClose");
+        const clearDialog = switchContainer.querySelector("#annotationClearDialog");
+        const clearCancel = switchContainer.querySelector("#annotationClearCancel");
+        const clearConfirm = switchContainer.querySelector("#annotationClearConfirm");
         darkModeToggle.checked = Boolean(settings.darkMode);
 
         function setStatus(message) {
@@ -281,7 +294,7 @@
                 start: Math.max(0, Math.min(start, end)),
                 end: Math.min(text.length, Math.max(start, end)),
             };
-            setStatus(`${selectedRange.end - selectedRange.start}자를 선택했습니다. 필기 버튼을 누르세요.`);
+            setStatus(`${selectedRange.end - selectedRange.start}자를 선택했습니다. 버튼이나 U/H/S 키로 필기하세요.`);
         }
 
         function clearSelection() {
@@ -320,19 +333,27 @@
             }
         }
 
+        function closeClearDialog() {
+            if (clearDialog.open) {
+                clearDialog.close();
+            }
+        }
+
+        function hasOpenDialog() {
+            return noteDialog.open || clearDialog.open;
+        }
+
         function applyAnnotation(type) {
             if (!selectedRange) {
                 setStatus("본문에서 필기할 부분을 먼저 선택하세요.");
                 return;
             }
-            const existing = annotations.find((annotation) => annotation.type === type
-                && annotation.start === selectedRange.start && annotation.end === selectedRange.end);
-            if (existing) {
+            const overlapsSameType = annotations.some((annotation) => annotation.type === type
+                && annotation.start < selectedRange.end
+                && annotation.end > selectedRange.start);
+            if (overlapsSameType) {
                 clearSelection();
-                setStatus("같은 범위에 이미 같은 필기가 있습니다.");
-                if (noteTypes.has(type)) {
-                    openNoteEditor(existing.id);
-                }
+                setStatus("선택한 범위에 같은 종류의 필기가 이미 있습니다.");
                 return;
             }
             const annotation = {
@@ -372,18 +393,24 @@
             setStatus("선택한 부분의 필기를 지웠습니다.");
         }
 
-        function clearAllAnnotations() {
+        function requestClearAllAnnotations() {
             if (!annotations.length) {
                 setStatus("지울 필기가 없습니다.");
                 return;
             }
-            if (!window.confirm("이 글의 밑줄, 하이라이트, 네모와 메모를 모두 지울까요?")) {
-                return;
+            clearSelection();
+            if (!clearDialog.open) {
+                clearDialog.showModal();
             }
+            window.requestAnimationFrame(() => clearCancel.focus());
+        }
+
+        function clearAllAnnotations() {
             annotations = [];
             persistAnnotations();
             renderText();
             clearSelection();
+            closeClearDialog();
             setStatus("이 글의 필기를 모두 지웠습니다.");
         }
 
@@ -404,7 +431,7 @@
             } else if (action === "remove") {
                 removeSelectedAnnotations();
             } else if (action === "clear") {
-                clearAllAnnotations();
+                requestClearAllAnnotations();
             }
         }
 
@@ -457,7 +484,7 @@
         }
 
         renderText();
-        setStatus("본문에서 필기할 부분을 선택한 뒤 도구 버튼을 누르세요.");
+        setStatus("본문에서 필기할 부분을 선택한 뒤 버튼이나 U/H/S 키를 누르세요.");
         document.addEventListener("selectionchange", captureSelection);
         toolbar.addEventListener("pointerdown", handleToolbarPointerDown);
         toolbar.addEventListener("click", handleToolbarClick);
@@ -465,6 +492,8 @@
         noteForm.addEventListener("submit", handleNoteSubmit);
         noteDelete.addEventListener("click", handleNoteDelete);
         noteClose.addEventListener("click", closeNoteEditor);
+        clearCancel.addEventListener("click", closeClearDialog);
+        clearConfirm.addEventListener("click", clearAllAnnotations);
         darkModeToggle.addEventListener("change", handleDarkModeChange);
         window.addEventListener("resize", scheduleNotePosition);
         if ("ResizeObserver" in window) {
@@ -474,6 +503,10 @@
 
         return {
             noteDialog,
+            applyAnnotation,
+            hasOpenDialog,
+            removeSelectedAnnotations,
+            requestClearAllAnnotations,
             destroy() {
                 document.removeEventListener("selectionchange", captureSelection);
                 toolbar.removeEventListener("pointerdown", handleToolbarPointerDown);
@@ -482,6 +515,8 @@
                 noteForm.removeEventListener("submit", handleNoteSubmit);
                 noteDelete.removeEventListener("click", handleNoteDelete);
                 noteClose.removeEventListener("click", closeNoteEditor);
+                clearCancel.removeEventListener("click", closeClearDialog);
+                clearConfirm.removeEventListener("click", clearAllAnnotations);
                 darkModeToggle.removeEventListener("change", handleDarkModeChange);
                 window.removeEventListener("resize", scheduleNotePosition);
                 if (noteResizeObserver) {
@@ -491,6 +526,7 @@
                     window.cancelAnimationFrame(notePositionFrame);
                 }
                 closeNoteEditor();
+                closeClearDialog();
             },
         };
     }

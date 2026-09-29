@@ -19,6 +19,9 @@ body.page-study {
 }
 
 .study-container {
+    --annotation-red: #dc2f3f;
+    --annotation-yellow: #ffe36b;
+    --annotation-blue: #3478d4;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     width: 100%;
@@ -709,6 +712,10 @@ body.line-mode-active .text-display.line-translation-display {
     transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
+.nav-label-short {
+    display: none;
+}
+
 .nav-button:hover {
     border-color: var(--accent-color);
     color: var(--accent-color);
@@ -863,9 +870,6 @@ body.study-fullscreen-active .fullscreen-toggle {
 }
 
 .annotation-display {
-    --annotation-red: #dc2f3f;
-    --annotation-yellow: #ffe36b;
-    --annotation-blue: #3478d4;
     white-space: normal;
     user-select: text;
 }
@@ -901,9 +905,8 @@ body.study-fullscreen-active .fullscreen-toggle {
 }
 
 .annotation-box {
-    padding: 0 0.1em;
     border-radius: 4px;
-    box-shadow: inset 0 0 0 2px var(--annotation-blue);
+    box-shadow: inset 0 0 0 3px var(--annotation-blue);
 }
 
 
@@ -957,10 +960,25 @@ body.study-fullscreen-active .fullscreen-toggle {
     color: var(--text-color-light);
     background: var(--surface-soft);
     font-size: 0.72rem;
-    font-weight: 750;
+    font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
     transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.annotation-tool kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5em;
+    margin-left: 4px;
+    padding: 0 4px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: color-mix(in srgb, currentColor 7%, transparent);
+    font: inherit;
+    font-size: 0.9em;
+    line-height: 1.35;
 }
 
 .annotation-tool:hover {
@@ -970,29 +988,21 @@ body.study-fullscreen-active .fullscreen-toggle {
 }
 
 .annotation-tool-underline {
-    border-bottom: 3px solid var(--annotation-red);
+    --annotation-tool-accent: var(--annotation-red);
 }
 
 .annotation-tool-highlight {
-    border-bottom: 3px solid var(--annotation-yellow);
-    color: var(--text-color-light);
-    background: var(--surface-soft);
-}
-
-.annotation-tool-highlight:hover {
-    color: var(--text-color);
-    background: var(--surface-muted);
+    --annotation-tool-accent: var(--annotation-yellow);
 }
 
 .annotation-tool-box {
-    border-color: var(--annotation-blue);
-    color: var(--annotation-blue);
+    --annotation-tool-accent: var(--annotation-blue);
 }
 
-
-.annotation-tool-remove,
-.annotation-tool-clear {
-    font-weight: 650;
+.annotation-tool-underline,
+.annotation-tool-highlight,
+.annotation-tool-box {
+    box-shadow: inset 0 -3px 0 var(--annotation-tool-accent);
 }
 
 .annotation-toolbar-divider {
@@ -1080,6 +1090,11 @@ body.study-fullscreen-active .fullscreen-toggle {
 .annotation-note-actions button.primary {
     color: white;
     background: var(--accent-color);
+}
+
+.annotation-note-actions button.danger {
+    color: white;
+    background: var(--annotation-red);
 }
 
 .annotation-note-actions button:disabled {
@@ -1237,6 +1252,7 @@ body.korean-visible .korean-widget {
     line-height: 1.3;
     text-align: center;
     outline: none;
+    -webkit-tap-highlight-color: transparent;
     transition: border-bottom-color 0.3s ease, background-color 0.3s ease;
 }
 
@@ -1246,6 +1262,10 @@ body.korean-visible .korean-widget {
 
 .blank-input.incorrect {
     border-bottom-color: var(--incorrect-color);
+}
+
+.blank-input:focus-visible {
+    outline: none;
 }
 
 .blank-input:focus,
@@ -1338,6 +1358,40 @@ body.korean-visible .korean-widget {
         flex: 1 1 100%;
     }
 
+    .navigation-buttons {
+        display: grid;
+        grid-template-areas: "previous modes next";
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 8px;
+    }
+
+    .study-mode-tabs {
+        grid-area: modes;
+        width: 100%;
+        min-width: 0;
+        flex-wrap: nowrap;
+    }
+
+    .study-mode-button {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0 8px;
+        font-size: 0.78rem;
+    }
+
+    .nav-side-previous {
+        grid-area: previous;
+    }
+
+    .nav-side-next {
+        grid-area: next;
+    }
+
+    .nav-button,
+    .nav-button-placeholder {
+        min-height: 45px;
+    }
+
     .main-controls {
         align-items: center;
         justify-content: space-between;
@@ -1348,7 +1402,29 @@ body.korean-visible .korean-widget {
     }
 
     .switch-container {
+        width: 100%;
         justify-content: flex-start;
+        gap: 10px 14px;
+    }
+
+    .annotation-toolbar {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .annotation-tool {
+        width: 100%;
+    }
+
+    .annotation-toolbar-divider {
+        display: none;
+    }
+
+    .annotation-theme-control {
+        justify-content: center;
+        min-height: 32px;
+        margin-left: 0;
     }
 }
 
@@ -1377,33 +1453,24 @@ body.korean-visible .korean-widget {
         padding: 10px 14px 12px;
     }
 
-    .navigation-buttons {
-        gap: 8px;
-    }
-
-    .study-mode-tabs {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
 
     .study-mode-button {
         flex: 1 1 0;
         min-width: 0;
         min-height: 35px;
-        padding: 0 9px;
+        padding: 0 5px;
         font-size: 0.76rem;
     }
 
     .nav-button {
         min-width: 74px;
-        min-height: 34px;
         padding: 0 9px;
         font-size: 0.72rem;
     }
 
+
     .nav-button-placeholder {
         width: 74px;
-        min-height: 34px;
     }
 
     .main-controls {
@@ -1412,31 +1479,11 @@ body.korean-visible .korean-widget {
         gap: 10px;
     }
 
-    .switch-container {
-        width: 100%;
-        gap: 10px 14px;
-    }
 
     .switch-label {
         font-size: 0.72rem;
     }
 
-    .annotation-toolbar {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .annotation-tool {
-        flex: 1 1 112px;
-    }
-
-    .annotation-toolbar-divider {
-        display: none;
-    }
-
-    .annotation-theme-control {
-        margin-left: 0;
-    }
 
     .text-display {
         padding: 28px 22px;
@@ -1476,6 +1523,29 @@ body.korean-visible .korean-widget {
 }
 
 @media (max-width: 480px) {
+    .nav-button {
+        width: 34px;
+        min-width: 34px;
+        padding: 0;
+    }
+
+    .nav-button-placeholder {
+        width: 34px;
+    }
+
+    .nav-label-long {
+        display: none;
+    }
+
+    .nav-label-short {
+        display: inline;
+    }
+
+    .study-mode-button {
+        padding: 0 2px;
+        font-size: 0.68rem;
+    }
+
     .study-title {
         display: -webkit-box;
         overflow: hidden;
