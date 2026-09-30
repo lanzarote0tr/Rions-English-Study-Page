@@ -711,20 +711,6 @@ body.study-fullscreen-active .fullscreen-toggle {
     grid-row: 1;
 }
 
-.info {
-    min-width: 0;
-    color: var(--text-color-light);
-    font-size: 0.78rem;
-    text-align: left;
-}
-
-.info p {
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .switch-container {
     display: flex;
     align-items: center;
@@ -769,18 +755,24 @@ body.study-fullscreen-active .fullscreen-toggle {
 
 .annotation-display::selection,
 .annotation-display *::selection {
-    color: #152033;
-    background: #9fc8ff;
+    color: inherit;
+    background: color-mix(in srgb, var(--text-color) 16%, transparent);
 }
 
 .annotation-segment {
     cursor: text;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
+    transition: background-color 0.18s ease, padding 0.18s ease;
 }
 
 .annotation-segment[data-annotation-note-ids] {
     cursor: pointer;
+}
+
+.annotation-sentence-active {
+    padding-block: var(--sentence-pad, 0);
+    background: color-mix(in srgb, var(--text-color) 5%, transparent);
 }
 
 .annotation-underline {
@@ -1163,10 +1155,6 @@ body.korean-visible .korean-widget {
     .main-controls {
         align-items: center;
         justify-content: space-between;
-    }
-
-    .info p {
-        white-space: normal;
     }
 
     .switch-container {

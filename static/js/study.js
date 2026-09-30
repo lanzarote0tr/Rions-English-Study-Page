@@ -729,24 +729,77 @@
 
             function initializeNotesMode() {
                 document.body.classList.remove("hide-upcoming", "korean-visible", "line-mode-active");
-                state.koreanVisible = false;
                 const textDisplay = document.getElementById("text-display");
                 const switchContainer = document.getElementById("switchContainer");
-                const statusText = document.getElementById("statusText");
                 const koreanWidget = document.getElementById("korean-widget");
                 const cursor = document.getElementById("cursor");
                 const englishText = (state.text.english_content || "").replace(/\*\*/g, "");
+                const koreanText = state.text.korean_content || "";
+                const notesProgress = getTextProgress().notes || {};
 
                 cursor.style.opacity = "0";
                 koreanWidget.textContent = "";
+                const koreanSentences = [];
+                if (koreanText) {
+                    getTranslationLines(state.text.line_pairs || [], koreanText).forEach((sentence) => {
+                        const span = document.createElement("span");
+                        span.innerText = sentence;
+                        koreanWidget.appendChild(span);
+                        koreanSentences.push(span);
+                    });
+                }
+
+                function highlightKoreanSentence(index) {
+                    koreanSentences.forEach((span, spanIndex) => {
+                        span.classList.toggle("highlight", spanIndex === index);
+                    });
+                    const target = koreanSentences[index];
+                    if (target && document.body.classList.contains("korean-visible")) {
+                        target.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }
 
                 const annotationController = window.EnglishStudyAnnotations.createController({
                     textDisplay,
                     switchContainer,
-                    statusText,
                     textPath: state.text.text_path,
                     text: englishText,
+                    sentences: getEnglishLineBoundaries(state.text.line_pairs || [], englishText),
+                    onSentenceChange: highlightKoreanSentence,
                 });
+                if (koreanText) {
+                    switchContainer.insertAdjacentHTML("afterbegin", '<div class="switch-group"><label class="switch"><input type="checkbox" id="toggle-korean"><span class="slider"></span></label><label for="toggle-korean" class="switch-label">한글</label></div>');
+                }
+                const koreanToggle = document.getElementById("toggle-korean");
+
+                function persistNotesProgress() {
+                    saveTextProgress("notes", { koreanVisible: state.koreanVisible });
+                }
+
+                function syncKoreanVisibility() {
+                    applyKoreanVisibility(koreanText);
+                    if (koreanToggle) {
+                        koreanToggle.checked = Boolean(state.koreanVisible);
+                    }
+                }
+
+                function toggleKoreanVisibility() {
+                    if (!koreanText) {
+                        return;
+                    }
+                    state.koreanVisible = !state.koreanVisible;
+                    syncKoreanVisibility();
+                    if (state.koreanVisible) {
+                        resetKoreanScroll(koreanWidget);
+                    }
+                    persistNotesProgress();
+                }
+
+                state.koreanVisible = Boolean(koreanText && notesProgress.koreanVisible);
+                syncKoreanVisibility();
+                if (koreanToggle) {
+                    koreanToggle.addEventListener("change", toggleKoreanVisibility);
+                }
                 const annotationShortcuts = {
                     u: "underline",
                     h: "highlight",
@@ -784,9 +837,14 @@
                         annotationController.applyAnnotation(annotationType);
                         return;
                     }
-                    if (event.shiftKey && event.key.toLowerCase() === "e") {
+                    if (event.shiftKey && key === "e") {
                         event.preventDefault();
                         navigateTo("backLink");
+                        return;
+                    }
+                    if (event.shiftKey && key === "k" && acceptsAnnotationShortcut) {
+                        event.preventDefault();
+                        toggleKoreanVisibility();
                         return;
                     }
                     if (!event.ctrlKey) {
@@ -804,9 +862,12 @@
                 document.addEventListener("keydown", handleKeydown);
                 cleanup = () => {
                     annotationController.destroy();
+                    if (koreanToggle) {
+                        koreanToggle.removeEventListener("change", toggleKoreanVisibility);
+                    }
                     document.removeEventListener("keydown", handleKeydown);
                 };
-                persistCurrentMode = () => {};
+                persistCurrentMode = persistNotesProgress;
             }
 
             function initializePracticeMode() {
@@ -815,7 +876,6 @@
                 const linePairs = state.text.line_pairs || [];
                 const textDisplay = document.getElementById("text-display");
                 const switchContainer = document.getElementById("switchContainer");
-                const statusText = document.getElementById("statusText");
                 const koreanWidget = document.getElementById("korean-widget");
                 const cursor = document.getElementById("cursor");
 
@@ -884,10 +944,6 @@
                         koreanWidget.appendChild(span);
                         koreanSentences.push(span);
                     });
-                }
-
-                function updateStatus() {
-                    statusText.textContent = "";
                 }
 
                 function updateKoreanToggle() {
@@ -1117,7 +1173,6 @@
 
                 function refreshPracticeView() {
                     document.body.classList.toggle("hide-upcoming", !state.settings.practiceReveal);
-                    updateStatus();
                     updateKoreanHighlight();
                     updateCursor(true);
                     updateResetButton();
@@ -1332,7 +1387,6 @@
                     }
                 }
                 skipAutoCharacters();
-                updateStatus();
                 updateResetButton();
                 updateKoreanHighlight();
                 if (state.koreanVisible) {
@@ -1372,7 +1426,6 @@
                 const linePairs = state.text.line_pairs || [];
                 const textDisplay = document.getElementById("text-display");
                 const switchContainer = document.getElementById("switchContainer");
-                const statusText = document.getElementById("statusText");
                 const koreanWidget = document.getElementById("korean-widget");
                 const cursor = document.getElementById("cursor");
                 cursor.style.opacity = "0";
@@ -1420,10 +1473,6 @@
                         koreanWidget.appendChild(span);
                         koreanSentences.push(span);
                     });
-                }
-
-                function updateStatus() {
-                    statusText.textContent = "";
                 }
 
                 function updateKoreanToggle() {
@@ -1594,7 +1643,6 @@
                     const value = (input.value || "").toLowerCase();
                     input.classList.toggle("correct", value === answer);
                     input.classList.toggle("incorrect", Boolean(value) && value !== answer);
-                    updateStatus();
                     updateResetButton();
                     persistFillProgress();
                     checkFillCompletion();
@@ -1758,7 +1806,6 @@
                         }
                     });
                 }
-                updateStatus();
                 updateResetButton();
                 if (blanks.length) {
                     const savedBlankIndex = Number.isInteger(fillProgress.currentBlankIndex)
@@ -1800,7 +1847,6 @@
 
                 const textDisplay = document.getElementById("text-display");
                 const switchContainer = document.getElementById("switchContainer");
-                const statusText = document.getElementById("statusText");
                 const koreanWidget = document.getElementById("korean-widget");
                 const cursor = document.getElementById("cursor");
                 const englishText = (state.text.english_content || "").replace(/\*\*/g, "");
@@ -1843,10 +1889,6 @@
 
                 const camera = document.getElementById("line-camera");
                 const scene = document.getElementById("line-scene");
-
-                function updateStatus() {
-                    statusText.textContent = "";
-                }
 
                 function renderScene() {
                     scene.innerHTML = "";
@@ -1906,7 +1948,6 @@
                     const activeCard = cards[activeIndex];
                     if (!activeCard) {
                         scene.style.transform = "translateY(0)";
-                        updateStatus();
                         return;
                     }
 
@@ -1917,12 +1958,10 @@
                         void scene.offsetHeight;
                         scene.style.transition = "";
                     }
-                    updateStatus();
                 }
 
                 function setActiveLine(index, animate = true) {
                     if (!maxLineCount) {
-                        updateStatus();
                         return;
                     }
                     const nextIndex = Math.min(Math.max(index, 0), maxLineCount - 1);

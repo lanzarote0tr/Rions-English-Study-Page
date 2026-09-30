@@ -76,15 +76,29 @@
         const {
             textDisplay,
             switchContainer,
-            statusText,
             textPath,
             text,
+            sentences = [],
+            onSentenceChange,
         } = options;
         let annotations = loadAnnotations(textPath, text);
         let selectedRange = null;
         let editingAnnotationId = null;
         let notePositionFrame = null;
         let noteResizeObserver = null;
+        let activeSentence = -1;
+        // Trim surrounding whitespace so the sentence background hugs the words.
+        const sentenceRanges = sentences.map(({ start, end }) => {
+            let trimmedStart = Math.max(0, start);
+            let trimmedEnd = Math.min(text.length, end);
+            while (trimmedStart < trimmedEnd && /\s/.test(text[trimmedStart])) {
+                trimmedStart += 1;
+            }
+            while (trimmedEnd > trimmedStart && /\s/.test(text[trimmedEnd - 1])) {
+                trimmedEnd -= 1;
+            }
+            return { start: trimmedStart, end: trimmedEnd };
+        });
 
         switchContainer.innerHTML = `
             <div class="annotation-toolbar" role="toolbar" aria-label="필기 도구">
@@ -125,23 +139,35 @@
             onConfirm: clearAllAnnotations,
         });
 
-        function setStatus(message) {
-            statusText.textContent = message;
-        }
-
-
         function persistAnnotations() {
             try {
                 saveAnnotations(textPath, text, annotations);
                 return true;
             } catch (error) {
-                setStatus("브라우저 저장 공간이 부족해 필기를 저장하지 못했습니다.");
                 return false;
             }
         }
 
+        // Browsers paint text selection across the full line box, but an inline
+        // background only covers the font's content area. Pad the sentence
+        // background by the difference so both boxes share the same height.
+        function updateSentenceMetrics() {
+            const probe = document.createElement("span");
+            probe.textContent = "x";
+            textDisplay.appendChild(probe);
+            const contentHeight = probe.getBoundingClientRect().height;
+            probe.remove();
+            const lineHeight = Number.parseFloat(getComputedStyle(textDisplay).lineHeight);
+            if (!Number.isFinite(lineHeight) || !contentHeight) {
+                return;
+            }
+            const pad = Math.max(0, (lineHeight - contentHeight) / 2);
+            textDisplay.style.setProperty("--sentence-pad", `${pad}px`);
+        }
+
         function positionNotes() {
             notePositionFrame = null;
+            updateSentenceMetrics();
             const displayRect = textDisplay.getBoundingClientRect();
             const segments = [...textDisplay.querySelectorAll(".annotation-segment")];
             textDisplay.querySelectorAll(".annotation-notes").forEach((group) => {
@@ -172,7 +198,6 @@
         function renderText() {
             textDisplay.textContent = "";
             if (!text) {
-                setStatus("필기할 영어 본문이 없습니다.");
                 return;
             }
 
@@ -180,6 +205,10 @@
             annotations.forEach((annotation) => {
                 boundaries.add(annotation.start);
                 boundaries.add(annotation.end);
+            });
+            sentenceRanges.forEach((range) => {
+                boundaries.add(range.start);
+                boundaries.add(range.end);
             });
             const sortedBoundaries = [...boundaries].sort((left, right) => left - right);
             const fragment = document.createDocumentFragment();
@@ -196,6 +225,11 @@
                 segment.dataset.annotationStart = String(start);
                 segment.dataset.annotationEnd = String(end);
                 segment.textContent = text.slice(start, end);
+                const sentenceIndex = sentenceRanges.findIndex((range) => start >= range.start && end <= range.end);
+                if (sentenceIndex >= 0) {
+                    segment.dataset.sentence = String(sentenceIndex);
+                    segment.classList.toggle("annotation-sentence-active", sentenceIndex === activeSentence);
+                }
                 active.forEach((annotation) => segment.classList.add(`annotation-${annotation.type}`));
                 const editable = active.filter((annotation) => noteTypes.has(annotation.type));
                 if (editable.length) {
@@ -281,7 +315,6 @@
                 start: Math.max(0, Math.min(start, end)),
                 end: Math.min(text.length, Math.max(start, end)),
             };
-            setStatus(`${selectedRange.end - selectedRange.start}자를 선택했습니다. 버튼이나 U/H/S 키로 필기하세요.`);
         }
 
         function clearSelection() {
@@ -326,7 +359,6 @@
 
         function applyAnnotation(type) {
             if (!selectedRange) {
-                setStatus("본문에서 필기할 부분을 먼저 선택하세요.");
                 return;
             }
             const overlapsSameType = annotations.some((annotation) => annotation.type === type
@@ -334,7 +366,6 @@
                 && annotation.end > selectedRange.start);
             if (overlapsSameType) {
                 clearSelection();
-                setStatus("선택한 범위에 같은 종류의 필기가 이미 있습니다.");
                 return;
             }
             const annotation = {
@@ -349,7 +380,6 @@
             persistAnnotations();
             renderText();
             clearSelection();
-            setStatus("선택한 부분에 필기를 저장했습니다.");
             if (noteTypes.has(type)) {
                 openNoteEditor(annotation.id);
             }
@@ -357,7 +387,6 @@
 
         function removeSelectedAnnotations() {
             if (!selectedRange) {
-                setStatus("지울 필기 부분을 먼저 선택하세요.");
                 return;
             }
             const previousLength = annotations.length;
@@ -365,18 +394,15 @@
                 annotation.end <= selectedRange.start || annotation.start >= selectedRange.end
             ));
             if (annotations.length === previousLength) {
-                setStatus("선택한 부분에 지울 필기가 없습니다.");
                 return;
             }
             persistAnnotations();
             renderText();
             clearSelection();
-            setStatus("선택한 부분의 필기를 지웠습니다.");
         }
 
         function requestClearAllAnnotations() {
             if (!annotations.length) {
-                setStatus("지울 필기가 없습니다.");
                 return;
             }
             clearSelection();
@@ -388,7 +414,6 @@
             persistAnnotations();
             renderText();
             clearSelection();
-            setStatus("이 글의 필기를 모두 지웠습니다.");
         }
 
         function handleToolbarPointerDown(event) {
@@ -413,14 +438,38 @@
         }
 
 
+        function applyActiveSentence() {
+            textDisplay.querySelectorAll(".annotation-segment[data-sentence]").forEach((segment) => {
+                segment.classList.toggle("annotation-sentence-active", Number(segment.dataset.sentence) === activeSentence);
+            });
+        }
+
+        function setActiveSentence(index) {
+            if (index === activeSentence) {
+                return;
+            }
+            activeSentence = index;
+            applyActiveSentence();
+            if (typeof onSentenceChange === "function") {
+                onSentenceChange(index);
+            }
+        }
+
         function handleTextClick(event) {
             const note = event.target.closest("[data-annotation-note-id]");
             if (note) {
                 openNoteEditor(note.dataset.annotationNoteId);
                 return;
             }
+            if (window.getSelection()?.toString()) {
+                return;
+            }
+            const clickedSegment = event.target.closest(".annotation-segment[data-sentence]");
+            if (clickedSegment) {
+                setActiveSentence(Number(clickedSegment.dataset.sentence));
+            }
             const segment = event.target.closest("[data-annotation-note-ids]");
-            if (!segment || window.getSelection()?.toString()) {
+            if (!segment) {
                 return;
             }
             const annotationId = segment.dataset.annotationNoteIds.split(",").at(-1);
@@ -438,7 +487,6 @@
             persistAnnotations();
             renderText();
             closeNoteEditor();
-            setStatus(annotation.note ? "작은 메모를 저장했습니다." : "메모를 비웠습니다.");
         }
 
         function handleNoteDelete() {
@@ -451,11 +499,9 @@
             persistAnnotations();
             renderText();
             closeNoteEditor();
-            setStatus("메모를 삭제했습니다.");
         }
 
         renderText();
-        setStatus("본문에서 필기할 부분을 선택한 뒤 버튼이나 U/H/S 키를 누르세요.");
         document.addEventListener("selectionchange", captureSelection);
         toolbar.addEventListener("pointerdown", handleToolbarPointerDown);
         toolbar.addEventListener("click", handleToolbarClick);
@@ -492,6 +538,7 @@
                 }
                 closeNoteEditor();
                 clearDialog.destroy();
+                textDisplay.style.removeProperty("--sentence-pad");
             },
         };
     }
