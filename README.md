@@ -1,4 +1,4 @@
-﻿# Rion's English Study Page
+﻿# Rion's English
 
 영어 지문을 필기, 글쓰기, 단어 채우기, 한줄 해석 방식으로 학습하는 Flask 웹 애플리케이션입니다.
 

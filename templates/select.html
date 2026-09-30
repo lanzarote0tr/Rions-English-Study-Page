@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 
-{% block title %}Rion's English Study Page{% endblock %}
 {% block body_class %}page-select{% endblock %}
 {% block page_key %}select{% endblock %}
 
@@ -8,7 +7,7 @@
     <div id="page-root" data-current-path="{{ browse["current_path"] }}">
         <div class="page-shell">
             <header class="app-header title-wrapper">
-                <h2 class="app-header-title site-title">Rion's English Study Page</h2>
+                <h2 class="app-header-title site-title">{{ site_name }}</h2>
             </header>
             <div class="select-container">
                 <div class="content-wrapper">

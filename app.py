@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, jsonify, redirect, render_template, request, send_from_directory, url_for
 from werkzeug.exceptions import HTTPException
 
 from content import build_browse_payload, build_text_payload, normalize_study_mode
@@ -27,7 +27,12 @@ STATIC_ASSET_FILES = (
     "js/study.js",
     "js/navigation.js",
     "img/rion.png",
+    "img/favicon.ico",
+    "img/icon-192.png",
+    "img/apple-touch-icon.png",
 )
+
+SITE_NAME = "Rion's English"
 
 
 @app.context_processor
@@ -39,6 +44,7 @@ def _inject_static_assets():
         return url_for("static", filename=filename, v=version)
 
     return {
+        "site_name": SITE_NAME,
         "static_asset": static_asset,
         "static_asset_version": version,
     }
@@ -118,6 +124,11 @@ def _render_study_page(text_path: str, mode: str | None) -> str:
 @app.route("/")
 def index() -> str:
     return _render_select_page("")
+
+
+@app.get("/favicon.ico")
+def favicon():
+    return send_from_directory(Path(app.static_folder) / "img", "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 
 @app.route("/select/")

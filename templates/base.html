@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="app-assets-version" content="{{ static_asset_version }}">
-    <title>{% block title %}Rion's English Study Page{% endblock %}</title>
+    <meta name="application-name" content="{{ site_name }}">
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <link rel="icon" href="{{ static_asset('img/favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ static_asset('img/icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ static_asset('img/apple-touch-icon.png') }}">
     <script src="{{ static_asset('js/theme-init.js') }}"></script>
     <link rel="stylesheet" href="{{ static_asset('css/base.css') }}">
     <link rel="stylesheet" href="{{ static_asset('css/select.css') }}">

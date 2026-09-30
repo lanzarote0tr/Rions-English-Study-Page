@@ -208,7 +208,8 @@
             if (studyTitle) {
                 studyTitle.textContent = state.text.title;
             }
-            document.title = `${state.text.title} - Rion's English Study Page`;
+            const siteName = document.querySelector('meta[name="application-name"]').content;
+            document.title = `${state.text.title} · ${siteName}`;
 
             if (previousContext.page !== "study" || previousContext.textPath !== state.text.text_path) {
                 delete state.progress[state.text.text_path];
