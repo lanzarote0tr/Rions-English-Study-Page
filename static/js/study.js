@@ -1,6 +1,8 @@
 (function () {
     const core = window.EnglishStudy;
     const studyProgressStorageKey = "englishStudyProgress";
+    // Panel/fullscreen state carried from one text to the next (prev/next navigation).
+    const studyViewStorageKey = "englishStudyCarriedView";
     const localTextPrefix = core.local.prefix;
     const studyPageContextKeys = {
         previousPage: "englishStudyPreviousPage",
@@ -33,6 +35,26 @@
             };
         } catch (error) {
             return { page: "", textPath: "" };
+        }
+    }
+
+    function loadCarriedStudyView() {
+        try {
+            const saved = JSON.parse(sessionStorage.getItem(studyViewStorageKey) || "{}") || {};
+            return {
+                koreanVisible: Boolean(saved.koreanVisible),
+                fullscreen: Boolean(saved.fullscreen),
+            };
+        } catch (error) {
+            return { koreanVisible: false, fullscreen: false };
+        }
+    }
+
+    function saveCarriedStudyView(view) {
+        try {
+            sessionStorage.setItem(studyViewStorageKey, JSON.stringify(view));
+        } catch (error) {
+            // Losing the carried view only resets the panels on the next text.
         }
     }
 
@@ -191,6 +213,12 @@
                 progress: loadStudyProgress(),
             };
             const previousContext = loadPreviousStudyContext();
+            const arrivedFromOtherText = previousContext.page === "study"
+                && previousContext.textPath !== state.text.text_path;
+            const carriedView = arrivedFromOtherText ? loadCarriedStudyView() : null;
+            if (carriedView) {
+                state.koreanVisible = carriedView.koreanVisible;
+            }
 
             let cleanup = () => {};
             let persistCurrentMode = () => {};
@@ -698,7 +726,7 @@
             document.addEventListener("keydown", handleMenuKeydown, true);
 
             const fullscreenToggle = document.getElementById("fullscreenToggle");
-            let studyFullscreenActive = false;
+            let studyFullscreenActive = Boolean(carriedView && carriedView.fullscreen);
 
             function isStudyFullscreen() {
                 return studyFullscreenActive;
@@ -795,7 +823,9 @@
                     persistNotesProgress();
                 }
 
-                state.koreanVisible = Boolean(koreanText && notesProgress.koreanVisible);
+                if (typeof notesProgress.koreanVisible === "boolean") {
+                    state.koreanVisible = notesProgress.koreanVisible;
+                }
                 syncKoreanVisibility();
                 if (koreanToggle) {
                     koreanToggle.addEventListener("change", toggleKoreanVisibility);
@@ -1843,7 +1873,6 @@
             function initializeLineMode() {
                 document.body.classList.remove("hide-upcoming", "korean-visible");
                 document.body.classList.add("line-mode-active");
-                state.koreanVisible = false;
 
                 const textDisplay = document.getElementById("text-display");
                 const switchContainer = document.getElementById("switchContainer");
@@ -2206,13 +2235,22 @@
             initializeStudyPage();
             syncModeIndicator();
 
+            function persistCarriedView() {
+                saveCarriedStudyView({
+                    koreanVisible: Boolean(state.koreanVisible),
+                    fullscreen: studyFullscreenActive,
+                });
+            }
+
             function handlePageHide() {
                 persistCurrentMode();
+                persistCarriedView();
             }
 
             window.addEventListener("pagehide", handlePageHide);
 
             return () => {
+                persistCarriedView();
                 persistCurrentMode();
                 cleanup();
                 if (modeIndicatorObserver) {

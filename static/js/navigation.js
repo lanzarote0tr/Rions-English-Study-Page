@@ -342,7 +342,6 @@
 
         const direction = getStudyTextDirection(sourceLink);
         const navChanges = getStudyTextNavChanges(currentRoot, nextRoot);
-        await closeKoreanPanelBeforeStudyTransition();
         applyStudyTextNavChangeClasses(currentRoot, navChanges);
         currentRoot.classList.add(`text-exit-${direction}`);
         await wait(motion.duration("--motion-exit"));
